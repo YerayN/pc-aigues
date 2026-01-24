@@ -106,7 +106,7 @@ cargarTiempoReal();
 // ==========================================
 
 // Inicializar Mapa
-const map = L.map('map').setView([38.495, -0.362], 15);
+const map = L.map('map').setView([38.500, -0.363], 17);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: 'OSM' }).addTo(map);
 
 // Capa de marcadores

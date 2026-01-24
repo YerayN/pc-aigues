@@ -19,12 +19,12 @@ async function cargarAlerta() {
     // 2. DICCIONARIO DE ICONOS (Tus Emojis guardados)
     // Aquí defines qué dibujo sale con cada color
     const iconos = {
-        verde:    "✅",  // Check verde
+        verde:    "☑️",  // Check verde
         amarillo: "⚠️",  // Triángulo precaución
         naranja:  "⚠️",  // Rombo naranja
-        rojo:     "🚨",  // Sirena
-        azul:     "ℹ️",  // Info
-        gris:     "🔘"   // Botón gris
+        rojo:     "⚠️",  // Sirena
+        azul:     "📣",  // Info
+        gris:     "📣"   // Botón gris
     };
 
     try {

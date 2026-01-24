@@ -224,7 +224,7 @@ const agendaAvisos = [
             [38.496, -0.360], 
             [38.494, -0.364]  
         ],
-        titulo: "🅿️ Parking Fiestas",
+        titulo: "🅿️ Parking",
         descripcion: "Zona habilitada para aparcar.",
         color: "blue",      // Color del borde
         relleno: "#3b82f6", // Color de dentro (Hexadecimal o nombre en inglés)
@@ -234,10 +234,10 @@ const agendaAvisos = [
     {
         tipo: "zona",
         coordenadas: [
-            [38.50036, -0.36333],
-            [38.50016, -0.36335],
-            [38.50014, -0.36347],
-            [38.50033, -0.36358]
+            [38.49984, -0.36437],
+            [38.49959, -0.36370],
+            [38.49919, -0.36402],
+            [38.49951, -0.36439]
         ], 
         titulo: "⛔ Zona Pirotecnia",
         descripcion: "Peligro: Fuegos artificiales",

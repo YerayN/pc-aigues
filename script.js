@@ -1,62 +1,67 @@
 // ==========================================
-// 1. SISTEMA DE ALERTAS (MODO PRO: CARGA EXTERNA)
+// 1. SISTEMA DE ALERTAS PRO (Iconos Automáticos)
 // ==========================================
 
 async function cargarAlerta() {
     const barra = document.getElementById('alert-bar');
     const texto = document.getElementById('alert-text');
 
-    // DICCIONARIO DE COLORES
-    const colores = {
+    // 1. DICCIONARIO DE COLORES (Estilos CSS)
+    const estilos = {
         verde:    "bg-green-600 text-white",
-        amarillo: "bg-yellow-400 text-black",
+        amarillo: "bg-yellow-400 text-black", // Letra negra para contraste
         naranja:  "bg-orange-500 text-white",
         rojo:     "bg-red-600 text-white animate-pulse",
         azul:     "bg-blue-600 text-white",
         gris:     "bg-gray-500 text-white"
     };
 
+    // 2. DICCIONARIO DE ICONOS (Tus Emojis guardados)
+    // Aquí defines qué dibujo sale con cada color
+    const iconos = {
+        verde:    "✅",  // Check verde
+        amarillo: "⚠️",  // Triángulo precaución
+        naranja:  "🔶",  // Rombo naranja
+        rojo:     "🚨",  // Sirena
+        azul:     "ℹ️",  // Info
+        gris:     "🔘"   // Botón gris
+    };
+
     try {
-        // EL TRUCO ANTI-CACHÉ:
-        // Añadimos "?v=" y la hora actual en milisegundos al final del nombre del archivo.
-        // El navegador piensa que es un archivo distinto cada milisegundo y lo baja de nuevo.
         const cacheBuster = new Date().getTime(); 
-        
-        // Pedimos el archivo JSON
         const respuesta = await fetch(`alerta.json?v=${cacheBuster}`);
         
-        // Si el archivo no existe o falla, lanzamos error
-        if (!respuesta.ok) throw new Error("No se pudo cargar la alerta");
+        if (!respuesta.ok) throw new Error("Fallo de red");
 
-        // Leemos los datos
         const datos = await respuesta.json();
 
-        // APLICAMOS LOS DATOS A LA WEB
-        texto.innerHTML = datos.mensaje;
+        // --- LA MAGIA ESTÁ AQUÍ ---
+        // 1. Buscamos el estilo de fondo
+        const estiloAsignado = estilos[datos.color] || estilos.gris;
         
-        // Buscamos el color (o gris si falla)
-        const clasesAsignadas = colores[datos.color] || colores.gris;
-        barra.className = `w-full py-3 px-4 text-center font-bold transition-colors duration-300 ${clasesAsignadas}`;
+        // 2. Buscamos el icono correspondiente
+        // Si no encuentra el color, pone un megáfono 📢 por defecto
+        const iconoAsignado = iconos[datos.color] || "📢";
 
-        // OPCIONAL: Si en el JSON pones "activa": false, ocultamos la barra
-        if (datos.activa === false) {
-            barra.style.display = 'none';
-        } else {
-            barra.style.display = 'block';
-        }
+        // 3. Montamos la frase final: ICONO + ESPACIO + MENSAJE
+        texto.innerHTML = `${iconoAsignado} &nbsp; ${datos.mensaje}`;
+        
+        // 4. Aplicamos las clases al fondo
+        barra.className = `w-full py-3 px-4 text-center font-bold transition-colors duration-300 ${estiloAsignado}`;
+
+        // Mostrar/Ocultar
+        barra.style.display = (datos.activa === false) ? 'none' : 'block';
 
     } catch (error) {
-        console.error("Error cargando alerta:", error);
-        // Si falla, mostramos un estado neutro
-        texto.innerHTML = "Protección Civil Aigües - Servicio Activo";
+        console.error("Error:", error);
+        // Fallback por si se rompe todo
+        texto.innerHTML = "🛡️ Protección Civil Aigües - Servicio Activo";
         barra.className = `w-full py-3 px-4 text-center font-bold text-white bg-pc-blue`;
     }
 }
 
-// Ejecutamos la función al cargar la web
+// Ejecutar e iniciar el bucle de comprobación
 cargarAlerta();
-
-// OPCIONAL: Que compruebe si la alerta ha cambiado cada 60 segundos sin recargar la web
 setInterval(cargarAlerta, 60000);
 
 

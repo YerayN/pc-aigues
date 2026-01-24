@@ -1,5 +1,5 @@
 {
-  "mensaje": "✅ Riesgo Bajo - Situación Normal",
-  "color": "verde",
+  "mensaje": "Alerta - Fuertes rachas de viento.",
+  "color": "naranja",
   "activa": true
 }

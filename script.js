@@ -182,10 +182,19 @@ const iconos = {
 const agendaAvisos = [
     {
         tipo: "punto", // Puede ser 'punto' o 'linea'
-        lat: 38.495, lng: -0.362,
-        titulo: "📍 Base Permanente",
-        descripcion: "Siempre activo",
+        lat: 38.50051, lng: -0.36386,
+        titulo: "📍 Ayuntamiento",
+        descripcion: "Ayuntamiento de la localidad.",
         color: "azul",
+        inicio: "", // Sin fecha = Siempre visible
+        fin: ""
+    },
+    {
+        tipo: "punto", // Puede ser 'punto' o 'linea'
+        lat: 38.50108, lng: -0.36453,
+        titulo: "📍 Farmacia",
+        descripcion: "Farmacia de Aigües.",
+        color: "verde",
         inicio: "", // Sin fecha = Siempre visible
         fin: ""
     },

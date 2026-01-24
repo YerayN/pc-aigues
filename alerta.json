@@ -1,5 +1,5 @@
 {
   "mensaje": "Alerta - Fuertes rachas de viento.",
-  "color": "verde",
+  "color": "rojo",
   "activa": true
 }

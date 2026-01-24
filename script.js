@@ -2,7 +2,7 @@
 // 1. PANEL DE CONTROL (¡TOCA AQUÍ!)
 // ==========================================
 // Aquí escribes libremente el mensaje del día
-const mensajeDelDia = "⚠️ ALERTA NARANJA: Rachas de viento fuertes en la zona de montaña y la calle principal del ayuntamiento";
+const mensajeDelDia = "⚠️ ALERTA NARANJA: Rachas de viento fuertes en la zona de montaña.";
 
 // Aquí eliges el color del semáforo. 
 // Opciones disponibles: "verde", "amarillo", "naranja", "rojo", "azul"

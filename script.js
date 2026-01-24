@@ -21,7 +21,7 @@ async function cargarAlerta() {
     const iconos = {
         verde:    "✅",  // Check verde
         amarillo: "⚠️",  // Triángulo precaución
-        naranja:  "🔶",  // Rombo naranja
+        naranja:  "⚠️",  // Rombo naranja
         rojo:     "🚨",  // Sirena
         azul:     "ℹ️",  // Info
         gris:     "🔘"   // Botón gris

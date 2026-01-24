@@ -1,0 +1,14 @@
+/* Estilos adicionales si Tailwind no es suficiente */
+
+/* Asegurar que el mapa tenga un z-index correcto para no tapar menús desplegables si los hubiera */
+#map {
+    z-index: 1;
+}
+
+/* Animación suave para el hover de las tarjetas */
+.hover-scale {
+    transition: transform 0.3s ease;
+}
+.hover-scale:hover {
+    transform: scale(1.02);
+}

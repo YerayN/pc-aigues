@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protección Civil Aigües</title>
+    
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configuración de colores personalizados para Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pc: {
+                            orange: '#FF6600',
+                            blue: '#003366',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Leaflet CSS (Mapa) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
+    <!-- Estilos Personalizados -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50 font-sans">
+
+    <!-- BARRA DE ALERTA (Se controla desde script.js) -->
+    <div id="alert-bar" class="w-full py-3 px-4 text-center font-bold text-white transition-colors duration-300">
+        <span id="alert-text">Cargando estado...</span>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="bg-pc-blue text-white shadow-lg relative z-50">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        
+        <div class="flex items-center space-x-3">
+<div class="w-10 h-10 relative rounded-full overflow-hidden shadow-sm bg-white flex items-center justify-center ring-2 ring-white/30">
+    <img src="src/escudo.png" alt="Escudo Protección Civil Aigües" class="w-full h-full object-cover">
+</div>          
+
+        <div>
+                <h1 class="text-lg md:text-xl font-bold leading-tight">Protección Civil</h1>
+                <p class="text-xs text-pc-orange font-bold tracking-wider">AIGÜES</p>
+            </div>
+        </div>
+
+        <button id="menu-btn" class="md:hidden text-white focus:outline-none">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+        </button>
+
+        <div class="hidden md:flex space-x-6 font-medium text-sm uppercase tracking-wide">
+            <a href="#" class="hover:text-pc-orange transition duration-300">Inicio</a>
+            <a href="#mapa" class="hover:text-pc-orange transition duration-300">Mapa</a>
+            <a href="#voluntarios" class="hover:text-pc-orange transition duration-300">Voluntarios</a>
+            <a href="#" class="hover:text-pc-orange transition duration-300">Contacto</a>
+        </div>
+    </div>
+
+    <div id="mobile-menu" class="hidden md:hidden bg-blue-900 border-t border-blue-800">
+        <a href="#" class="block py-3 px-4 hover:bg-pc-orange transition">Inicio</a>
+        <a href="#mapa" class="block py-3 px-4 hover:bg-pc-orange transition">Mapa</a>
+        <a href="#voluntarios" class="block py-3 px-4 hover:bg-pc-orange transition">Voluntarios</a>
+        <a href="#" class="block py-3 px-4 hover:bg-pc-orange transition">Contacto</a>
+    </div>
+</nav>
+
+<script>
+    const btn = document.getElementById('menu-btn');
+    const menu = document.getElementById('mobile-menu');
+
+    btn.addEventListener('click', () => {
+        menu.classList.toggle('hidden');
+    });
+</script>
+
+    <!-- HERO SECTION -->
+    <header class="relative bg-gray-900 h-auto md:h-[600px] flex items-center justify-center text-center px-4 py-20 md:py-0 overflow-hidden">
+    <div class="absolute inset-0 bg-black/60 z-10"></div>
+    <img src="src/fondo_hero.jpg" alt="Fondo Protección Civil" class="absolute inset-0 w-full h-full object-cover z-0">
+    
+    <div class="relative z-20 max-w-4xl mx-auto flex flex-col items-center">
+        <h2 class="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg leading-tight">
+            Siempre alerta, siempre cerca, <br class="hidden md:block" /> <span class="text-pc-orange">siempre Aigües.</span>
+        </h2>
+
+        <p class="text-lg md:text-xl text-gray-200 mb-8 max-w-2xl font-light">
+            Somos tus vecinos. Estamos formados y preparados para estar a tu lado cuando más importa.
+        </p>
+
+        <div class="mb-8 bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-xl shadow-lg max-w-xs mx-auto flex items-center space-x-4 text-white">
+            <div id="weather-icon" class="text-4xl filter drop-shadow">☀️</div> <div class="text-left">
+                <p class="text-gray-300 text-xs font-bold uppercase tracking-wider">Tiempo actual en Aigües</p>
+                <p id="weather-temp" class="text-3xl font-bold">--°C</p>
+            </div>
+        </div>
+
+        <a href="https://wa.me/34600000000?text=Hola,%20quiero%20suscribirme%20a%20las%20alertas%20de%20Protección%20Civil" target="_blank" class="group relative inline-flex items-center justify-center overflow-hidden rounded-full p-[2px] transition-transform hover:scale-105 duration-300 shadow-xl">
+    
+            <span class="absolute inset-[-1000%] animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#22c55e_0%,#86efac_50%,#22c55e_100%)] opacity-70"></span>
+            
+            <span class="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-green-900/90 backdrop-blur-md px-8 py-4 text-lg font-bold text-white transition-all group-hover:bg-green-800 border border-green-500/50">
+                <svg class="w-6 h-6 mr-3 fill-current group-hover:animate-bounce" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+                RECIBIR ALERTAS
+            </span>
+        </a>
+    </div>
+</header>
+
+    <!-- SECCIÓN MAPA -->
+    <section id="mapa" class="py-16 container mx-auto px-4">
+        <div class="text-center mb-10">
+            <h3 class="text-3xl font-bold text-pc-blue mb-2">Mapa de Incidencias y Recursos</h3>
+            <p class="text-gray-600">Información en tiempo real sobre cortes, puestos y alertas.</p>
+        </div>
+        
+        <!-- Contenedor del Mapa -->
+        <div id="map" class="w-full h-[500px] rounded-xl shadow-2xl border-2 border-gray-200 z-0"></div>
+    </section>
+
+    <!-- SECCIÓN VOLUNTARIOS -->
+    <section id="voluntarios" class="bg-gray-100 py-16">
+    <div class="container mx-auto px-4">
+        <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
+            
+            <div class="bg-pc-blue text-white p-10 md:w-2/5 flex flex-col justify-center text-center md:text-left">
+                <h3 class="text-3xl font-bold mb-4">Únete al equipo</h3>
+                <p class="mb-8 text-blue-100 text-lg leading-relaxed">Tu ayuda es fundamental. Fórmate y colabora activamente en la seguridad de tu municipio.</p>
+                
+                <ul class="space-y-4 text-base font-medium flex flex-col items-center md:items-start">
+                    <li class="flex items-center bg-blue-800/30 px-4 py-2 rounded-lg w-full md:w-auto justify-center md:justify-start">
+                        <span class="mr-3 text-2xl">🎓</span> Formación continua
+                    </li>
+                    <li class="flex items-center bg-blue-800/30 px-4 py-2 rounded-lg w-full md:w-auto justify-center md:justify-start">
+                        <span class="mr-3 text-2xl">⛑️</span> Equipo y material
+                    </li>
+                    <li class="flex items-center bg-blue-800/30 px-4 py-2 rounded-lg w-full md:w-auto justify-center md:justify-start">
+                        <span class="mr-3 text-2xl">🛡️</span> Seguro de accidentes
+                    </li>
+                </ul>
+            </div>
+
+            <div class="p-10 md:w-3/5 bg-gray-50">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">Formulario de Inscripción</h3>
+                <form class="space-y-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Nombre</label>
+                            <input type="text" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pc-orange focus:border-transparent outline-none transition bg-white" placeholder="Tu nombre">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Apellidos</label>
+                            <input type="text" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pc-orange focus:border-transparent outline-none transition bg-white" placeholder="Tus apellidos">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Teléfono</label>
+                        <input type="tel" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pc-orange focus:border-transparent outline-none transition bg-white" placeholder="600 000 000">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Email</label>
+                        <input type="email" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pc-orange focus:border-transparent outline-none transition bg-white" placeholder="correo@ejemplo.com">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Mensaje (Opcional)</label>
+                        <textarea class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pc-orange focus:border-transparent outline-none transition bg-white" rows="3" placeholder="Cuéntanos por qué quieres unirte..."></textarea>
+                    </div>
+                    <button type="button" class="w-full bg-pc-orange hover:bg-orange-600 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform active:scale-[0.98]">
+                        Enviar Solicitud
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!-- FOOTER -->
+    <footer class="bg-gray-800 text-gray-400 py-8 text-center">
+        <p>&copy; 2026 Protección Civil Aigües. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- Leaflet JS (Mapa) -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Nuestro Script Principal -->
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,45 +1,63 @@
 // ==========================================
-// 1. PANEL DE CONTROL (¡TOCA AQUÍ!)
+// 1. SISTEMA DE ALERTAS (MODO PRO: CARGA EXTERNA)
 // ==========================================
-// Aquí escribes libremente el mensaje del día
-const mensajeDelDia = "⚠️ ALERTA NARANJA: Rachas de viento fuertes en la zona de montaña.";
 
-// Aquí eliges el color del semáforo. 
-// Opciones disponibles: "verde", "amarillo", "naranja", "rojo", "azul"
-const colorSemaforo = "naranja"; 
-
-
-// ==========================================
-// 2. LÓGICA (ESTO NO HACE FALTA QUE LO TOQUES A DIARIO)
-// ==========================================
-function actualizarAlerta() {
+async function cargarAlerta() {
     const barra = document.getElementById('alert-bar');
     const texto = document.getElementById('alert-text');
 
-    // Diccionario de colores: Asocia tu palabra simple con las clases de Tailwind
-    // Esto es muy útil en programación para no tener que recordar códigos raros
+    // DICCIONARIO DE COLORES
     const colores = {
-        verde:    "bg-green-600 text-white",     // Todo bien
-        amarillo: "bg-yellow-400 text-black",    // Precaución (letrar negras para que se lea bien)
-        naranja:  "bg-orange-500 text-white",    // Alerta importante
-        rojo:     "bg-red-600 text-white animate-pulse", // Peligro (con animación de pálpito)
-        azul:     "bg-blue-600 text-white",      // Aviso informativo (ej: corte de agua)
-        gris:     "bg-gray-500 text-white"       // Desactivado o info técnica
+        verde:    "bg-green-600 text-white",
+        amarillo: "bg-yellow-400 text-black",
+        naranja:  "bg-orange-500 text-white",
+        rojo:     "bg-red-600 text-white animate-pulse",
+        azul:     "bg-blue-600 text-white",
+        gris:     "bg-gray-500 text-white"
     };
 
-    // 1. Ponemos el texto que tú has escrito arriba
-    texto.innerHTML = mensajeDelDia;
+    try {
+        // EL TRUCO ANTI-CACHÉ:
+        // Añadimos "?v=" y la hora actual en milisegundos al final del nombre del archivo.
+        // El navegador piensa que es un archivo distinto cada milisegundo y lo baja de nuevo.
+        const cacheBuster = new Date().getTime(); 
+        
+        // Pedimos el archivo JSON
+        const respuesta = await fetch(`alerta.json?v=${cacheBuster}`);
+        
+        // Si el archivo no existe o falla, lanzamos error
+        if (!respuesta.ok) throw new Error("No se pudo cargar la alerta");
 
-    // 2. Buscamos el color que has elegido en nuestro "diccionario"
-    // Si te equivocas al escribir el color, usará gris por defecto (eso hace el ||)
-    const clasesAsignadas = colores[colorSemaforo] || colores.gris;
-    
-    // 3. Aplicamos las clases
-    barra.className = `w-full py-3 px-4 text-center font-bold transition-colors duration-300 ${clasesAsignadas}`;
+        // Leemos los datos
+        const datos = await respuesta.json();
+
+        // APLICAMOS LOS DATOS A LA WEB
+        texto.innerHTML = datos.mensaje;
+        
+        // Buscamos el color (o gris si falla)
+        const clasesAsignadas = colores[datos.color] || colores.gris;
+        barra.className = `w-full py-3 px-4 text-center font-bold transition-colors duration-300 ${clasesAsignadas}`;
+
+        // OPCIONAL: Si en el JSON pones "activa": false, ocultamos la barra
+        if (datos.activa === false) {
+            barra.style.display = 'none';
+        } else {
+            barra.style.display = 'block';
+        }
+
+    } catch (error) {
+        console.error("Error cargando alerta:", error);
+        // Si falla, mostramos un estado neutro
+        texto.innerHTML = "Protección Civil Aigües - Servicio Activo";
+        barra.className = `w-full py-3 px-4 text-center font-bold text-white bg-pc-blue`;
+    }
 }
 
-// Ejecutamos la función
-actualizarAlerta();
+// Ejecutamos la función al cargar la web
+cargarAlerta();
+
+// OPCIONAL: Que compruebe si la alerta ha cambiado cada 60 segundos sin recargar la web
+setInterval(cargarAlerta, 60000);
 
 
 // ==========================================

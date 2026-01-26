@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intranet - Inicio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { colors: { pc: { orange: '#FF6600', blue: '#003366' } } }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 font-sans min-h-screen flex flex-col">
+
+    <nav class="bg-pc-blue text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="font-bold text-lg tracking-wider">PC <span class="text-pc-orange">AIGÜES</span></div>
+            <div class="flex items-center gap-4">
+                <span id="user-name" class="font-medium">Cargando...</span>
+                <button onclick="cerrarSesion()" class="text-gray-300 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 flex-grow">
+        
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-gray-800">Panel Principal</h1>
+            <p class="text-gray-500">Selecciona una aplicación para comenzar.</p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+
+            <a href="gestion.html" id="btn-gestion" class="hidden group bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition-all border-b-4 border-pc-orange hover:-translate-y-1">
+                <div class="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center text-3xl mb-4 group-hover:bg-pc-orange group-hover:text-white transition">
+                    📋
+                </div>
+                <h3 class="font-bold text-gray-800">Gestión Operativa</h3>
+                <p class="text-xs text-gray-500 mt-1">Asignar puestos y controlar personal.</p>
+            </a>
+
+            <a href="calendario.html" class="group bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition-all border-b-4 border-blue-500 hover:-translate-y-1">
+                <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center text-3xl mb-4 group-hover:bg-blue-500 group-hover:text-white transition">
+                    📅
+                </div>
+                <h3 class="font-bold text-gray-800">Calendario</h3>
+                <p class="text-xs text-gray-500 mt-1">Próximos eventos y servicios.</p>
+            </a>
+
+            <a href="#" class="group bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition-all border-b-4 border-green-500 hover:-translate-y-1">
+                <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center text-3xl mb-4 group-hover:bg-green-500 group-hover:text-white transition">
+                    📂
+                </div>
+                <h3 class="font-bold text-gray-800">Documentos</h3>
+                <p class="text-xs text-gray-500 mt-1">Protocolos y normativas.</p>
+            </a>
+
+            <a href="#" class="group bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition-all border-b-4 border-purple-500 hover:-translate-y-1">
+                <div class="w-14 h-14 bg-purple-100 rounded-full flex items-center justify-center text-3xl mb-4 group-hover:bg-purple-500 group-hover:text-white transition">
+                    👤
+                </div>
+                <h3 class="font-bold text-gray-800">Mi Perfil</h3>
+                <p class="text-xs text-gray-500 mt-1">Datos personales y equipo.</p>
+            </a>
+
+        </div>
+    </main>
+
+    <script>
+        // Lógica de permisos al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            const rol = localStorage.getItem('pc_rol');
+            const nombre = localStorage.getItem('pc_usuario');
+
+            // 1. Poner el nombre en la barra
+            if(nombre) {
+                document.getElementById('user-name').innerText = "Hola, " + nombre;
+            } else {
+                // Si no hay usuario, te echa al login (seguridad básica)
+                window.location.href = 'login.html';
+            }
+
+            // 2. MOSTRAR U OCULTAR EL BOTÓN DE JEFE
+            if (rol === 'jefe') {
+                // Si es jefe, le quitamos la clase 'hidden' para que se vea
+                document.getElementById('btn-gestion').classList.remove('hidden');
+            }
+        });
+
+        function cerrarSesion() {
+            localStorage.clear(); // Borramos datos
+            window.location.href = 'login.html'; // Al login
+        }
+    </script>
+</body>
+</html>

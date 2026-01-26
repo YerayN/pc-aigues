@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intranet - Calendario</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { colors: { pc: { orange: '#FF6600', blue: '#003366' } } }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 font-sans min-h-screen flex flex-col">
+
+    <nav class="bg-pc-blue text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="font-bold text-lg tracking-wider">PC <span class="text-pc-orange">AIGÜES</span></div>
+            <a href="dashboard.html" class="text-xs bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded transition">
+                ⬅ Volver
+            </a>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        
+        <div class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-gray-800">Tablón de Servicios</h1>
+            <p class="text-gray-500 mb-4">Próximos eventos convocados por la agrupación.</p>
+            
+            <div class="inline-flex items-center bg-white border border-gray-300 rounded-full px-4 py-2 shadow-sm">
+                <input type="checkbox" id="filtro-mios" class="w-5 h-5 text-pc-orange focus:ring-pc-orange border-gray-300 rounded cursor-pointer">
+                <label for="filtro-mios" class="ml-2 text-sm font-bold text-gray-700 cursor-pointer select-none">
+                    Ver solo mis asignaciones
+                </label>
+            </div>
+            </div>
+
+        <div id="contenedor-calendario" class="space-y-6">
+            </div>
+
+    </main>
+
+    <script src="../assets/js/calendario.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="../assets/js/config.js"></script>
+
+</body>
+</html>

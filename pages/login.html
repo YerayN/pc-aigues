@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intranet - Protección Civil Aigües</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pc: { orange: '#FF6600', blue: '#003366' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 font-sans h-screen flex flex-col">
+
+    <nav class="bg-pc-blue text-white shadow-md py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="font-bold text-xl tracking-wider">PROTECCIÓN CIVIL <span class="text-pc-orange">AIGÜES</span></div>
+            </div>
+            <a href="../index.html" class="text-sm text-gray-300 hover:text-white flex items-center gap-1">
+                ⬅ Volver a la web
+            </a>
+        </div>
+    </nav>
+
+    <div class="flex-grow flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl flex overflow-hidden max-w-4xl w-full h-[500px]">
+            
+            <div class="hidden md:block w-1/2 bg-gray-900 relative">
+                <img src="/assets/img/fondo_hero.jpg" alt="Fondo" class="absolute inset-0 w-full h-full object-cover opacity-60">
+                <div class="relative z-10 p-10 h-full flex flex-col justify-center text-white">
+                    <h2 class="text-3xl font-bold mb-4">Gestión Interna</h2>
+                    <p class="text-gray-200">Acceso restringido únicamente a voluntarios y personal autorizado de la agrupación de Aigües.</p>
+                </div>
+            </div>
+
+            <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold text-pc-blue">Iniciar Sesión</h1>
+                    <p class="text-gray-500 text-sm mt-2">Introduce tus credenciales de voluntario</p>
+                </div>
+
+                <form id="loginForm" class="space-y-6">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                        <input 
+                            type="email" 
+                            id="username" 
+                            class="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-300 focus:border-pc-orange focus:bg-white focus:ring-0 transition outline-none" 
+                            placeholder="ejemplo@gmail.com" 
+                            required
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Contraseña</label>
+                        <input type="password" id="password" class="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-300 focus:border-pc-orange focus:bg-white focus:ring-0 transition outline-none" placeholder="••••••••">
+                    </div>
+
+                    <div id="error-msg" class="hidden text-red-500 text-sm text-center font-bold bg-red-100 p-2 rounded">
+                        Usuario o contraseña incorrectos
+                    </div>
+
+                    <button type="submit" class="w-full bg-pc-blue hover:bg-blue-900 text-white font-bold py-3 rounded-lg shadow-lg hover:shadow-xl transition transform active:scale-95">
+                        ENTRAR AL SISTEMA
+                    </button>
+                </form>
+                
+                <div class="mt-6 text-center">
+                    <a href="#" class="text-sm text-gray-400 hover:text-pc-orange">¿Has olvidado tu contraseña?</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="../assets/js/config.js"></script>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // NOTA: Supabase Auth funciona con Email, no con DNI directamente.
+            // Usaremos el email que tienes en tu captura (jefe@pcaigues.com)
+            const emailInput = document.getElementById('username').value.trim(); 
+            const passInput = document.getElementById('password').value.trim();
+            
+            const errorMsg = document.getElementById('error-msg');
+            const btnSubmit = document.querySelector('button[type="submit"]');
+
+            btnSubmit.innerText = "Verificando...";
+            btnSubmit.disabled = true;
+            errorMsg.classList.add('hidden');
+
+            try {
+                // 1. INTENTO DE LOGIN CON SUPABASE AUTH (Aquí se comprueba el Hash automáticamente)
+                const { data: dataAuth, error: errorAuth } = await sb.auth.signInWithPassword({
+                    email: emailInput,
+                    password: passInput
+                });
+
+                if (errorAuth) throw new Error("Credenciales incorrectas");
+
+                // 2. SI EL LOGIN ES CORRECTO, TENEMOS EL ID DEL USUARIO
+                const userId = dataAuth.user.id;
+
+                // 3. BUSCAMOS SUS DATOS EN TU TABLA 'PERFILES' USANDO ESE ID
+                const { data: dataPerfil, error: errorPerfil } = await sb
+                    .from('perfiles')
+                    .select('*')
+                    .eq('id', userId) // Buscamos por el ID que coincida (Foreign Key)
+                    .single();
+
+                if (errorPerfil || !dataPerfil) {
+                    throw new Error("Usuario autenticado pero sin perfil asignado.");
+                }
+
+                // 4. GUARDAMOS SESIÓN Y ENTRAMOS
+                localStorage.setItem('pc_usuario', dataPerfil.nombre);
+                localStorage.setItem('pc_rol', dataPerfil.rol === 'admin' ? 'jefe' : 'voluntario');
+                localStorage.setItem('pc_id', dataPerfil.id);
+
+                window.location.href = 'dashboard.html';
+
+            } catch (err) {
+                console.error(err);
+                errorMsg.classList.remove('hidden');
+                // Si falla, mostramos mensaje genérico por seguridad
+                errorMsg.innerText = "Usuario o contraseña incorrectos"; 
+                
+                btnSubmit.innerText = "ENTRAR AL SISTEMA";
+                btnSubmit.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -28,7 +28,7 @@ async function cargarAlerta() {
 
     try {
         const cacheBuster = new Date().getTime(); 
-        const respuesta = await fetch(`alerta.json?v=${cacheBuster}`);
+        const respuesta = await fetch(`assets/data/alerta.json?v=${cacheBuster}`);
         
         if (!respuesta.ok) throw new Error("Fallo de red");
 
@@ -144,7 +144,7 @@ async function actualizarMapaEnTiempoReal() {
 
     try {
         // 2. PEDIMOS LOS DATOS A 'mapa.json'
-        const respuesta = await fetch(`mapa.json?v=${cacheBuster}`);
+        const respuesta = await fetch(`assets/data/mapa.json?v=${cacheBuster}`);
         if (!respuesta.ok) throw new Error("No se pudo cargar el mapa");
         
         // Guardamos los datos del archivo en la variable agendaAvisos

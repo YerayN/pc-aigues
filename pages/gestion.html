@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intranet - Planificación</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { colors: { pc: { orange: '#FF6600', blue: '#003366' } } }
+            }
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="../assets/js/config.js"></script>
+</head>
+<body class="bg-gray-100 font-sans min-h-screen flex flex-col">
+
+    <nav class="bg-pc-blue text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="font-bold text-lg tracking-wider">PC <span class="text-pc-orange">AIGÜES</span></div>
+            <div class="flex items-center gap-4">
+                <a href="dashboard.html" class="text-xs bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded transition">
+                    ⬅ Volver al Menú
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 flex-grow max-w-5xl">
+        
+        <div class="flex flex-col md:flex-row justify-between items-end mb-8 border-b border-gray-300 pb-4 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Planificador de Servicios</h1>
+                <p class="text-gray-500">Gestión de próximos eventos y asignación de personal.</p>
+            </div>
+            <button onclick="abrirModalServicio()" class="bg-pc-orange hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition transform active:scale-95 flex items-center gap-2">
+                <span class="text-xl">+</span> Crear Nuevo Evento
+            </button>
+        </div>
+
+        <div id="contenedor-servicios" class="space-y-6">
+            </div>
+
+        <div class="mt-12 mb-6 border-t-2 border-gray-200 pt-8">
+            <h2 class="text-2xl font-bold text-gray-400 flex items-center gap-2">
+                📂 Historial de Servicios
+                <span class="text-sm font-normal text-gray-400 bg-gray-200 px-2 py-1 rounded-full">Finalizados</span>
+            </h2>
+        </div>
+
+        <div id="contenedor-historial" class="space-y-6 opacity-75 grayscale hover:grayscale-0 transition duration-500">
+            </div>
+
+    </main>
+
+    <div id="modal-servicio" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+            <div class="bg-pc-blue px-6 py-4 flex justify-between items-center">
+                <h3 class="text-white font-bold text-lg">Nuevo Servicio</h3>
+                <button onclick="cerrarModal()" class="text-white hover:text-pc-orange text-2xl">&times;</button>
+            </div>
+            <form id="form-servicio" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-1">Nombre del Evento</label>
+                    <input type="text" id="titulo-evento" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pc-orange outline-none" placeholder="Ej: Cabalgata Reyes" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-1">Fecha</label>
+                        <input type="date" id="fecha-evento" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pc-orange outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-1">Hora Inicio</label>
+                        <input type="time" id="hora-evento" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pc-orange outline-none" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-1">Descripción / Ubicación</label>
+                    <textarea id="desc-evento" rows="2" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pc-orange outline-none" placeholder="Detalles importantes..."></textarea>
+                </div>
+                <div class="flex justify-end gap-3 mt-4">
+                    <button type="button" onclick="cerrarModal()" class="text-gray-500 hover:text-gray-700">Cancelar</button>
+                    <button type="submit" class="bg-pc-blue text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-900 transition">Crear Evento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../assets/js/gestion.js"></script>
+</body>
+</html>

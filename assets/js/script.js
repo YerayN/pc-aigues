@@ -100,7 +100,7 @@ const iconosMapa = {
 
 async function actualizarMapaEnTiempoReal() {
     try {
-        // CAMBIO: Leemos de la tabla 'mapa_elementos'
+        // Pedimos TODO a Supabase
         const { data: agendaAvisos, error } = await sb
             .from('mapa_elementos')
             .select('*');
@@ -113,12 +113,17 @@ async function actualizarMapaEnTiempoReal() {
         agendaAvisos.forEach(aviso => {
             let mostrar = true;
 
-            // Filtro de fechas (Si tiene fecha inicio/fin)
+            // 1. FILTRO DE FECHAS (Programación)
             if (aviso.inicio && aviso.fin) {
                 const fechaInicio = new Date(aviso.inicio);
                 const fechaFin = new Date(aviso.fin);
-                if (ahora < fechaInicio || ahora > fechaFin) mostrar = false;
+                
+                // Si aún no ha empezado O ya ha terminado -> NO MOSTRAR
+                if (ahora < fechaInicio || ahora > fechaFin) {
+                    mostrar = false;
+                }
             }
+            // Si inicio/fin son null, mostrar = true (siempre visible)
 
             if (mostrar) {
                 // TIPO: PUNTO
@@ -128,16 +133,23 @@ async function actualizarMapaEnTiempoReal() {
                      .bindPopup(`<b>${aviso.titulo}</b><br>${aviso.descripcion || ''}`)
                      .addTo(capaAvisos);
                 
-                // TIPO: LÍNEA o ZONA (Usan columna 'coordenadas')
+                // TIPO: LÍNEA (Corte de calle)
                 } else if (aviso.tipo === "linea" && aviso.coordenadas) {
-                    L.polyline(aviso.coordenadas, { color: aviso.color || 'blue', weight: 5 })
+                    L.polyline(aviso.coordenadas, { 
+                        color: convertirColorHex(aviso.color), // Usamos función auxiliar para traducir nombre a hex
+                        weight: 5,
+                        opacity: 0.7
+                    })
                      .bindPopup(`<b>${aviso.titulo}</b><br>${aviso.descripcion || ''}`)
                      .addTo(capaAvisos);
 
+                // TIPO: ZONA
                 } else if (aviso.tipo === "zona" && aviso.coordenadas) {
                     L.polygon(aviso.coordenadas, { 
-                        color: aviso.color || 'orange',
-                        fillColor: aviso.relleno || 'yellow', fillOpacity: 0.4
+                        color: convertirColorHex(aviso.color),
+                        fillColor: convertirColorHex(aviso.color),
+                        fillOpacity: 0.3,
+                        weight: 2 
                     })
                     .bindPopup(`<b>${aviso.titulo}</b><br>${aviso.descripcion || ''}`)
                     .addTo(capaAvisos);
@@ -148,6 +160,18 @@ async function actualizarMapaEnTiempoReal() {
     } catch (error) {
         console.error("Error mapa:", error);
     }
+}
+
+// Función auxiliar para que las líneas tengan colores bonitos
+function convertirColorHex(nombreColor) {
+    const colores = {
+        'rojo': '#e11d48',    // Red-600
+        'azul': '#2563eb',    // Blue-600
+        'verde': '#16a34a',   // Green-600
+        'naranja': '#ea580c', // Orange-600
+        'amarillo': '#ca8a04' // Yellow-600
+    };
+    return colores[nombreColor] || '#2563eb'; // Azul por defecto
 }
 
 // INICIALIZACIÓN

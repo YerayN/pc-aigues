@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Mapa Público</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { pc: { orange: '#FF6600', blue: '#003366' } } } } }
+    </script>
+</head>
+<body class="bg-gray-100 font-sans h-screen flex flex-col">
+
+    <nav class="bg-gray-900 text-white p-4 flex justify-between items-center shadow-lg z-50">
+        <div class="font-bold text-lg flex items-center gap-2">
+            <span>🗺️ Editor de Mapa Público</span>
+        </div>
+        <a href="dashboard.html" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm transition">Volver al Panel</a>
+    </nav>
+
+    <div class="flex flex-1 overflow-hidden">
+        
+        <div class="w-2/3 relative h-full">
+            <div id="map" class="w-full h-full z-0"></div>
+            
+            <div id="instrucciones-mapa" class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-lg text-sm font-bold text-gray-700 z-[400] border border-gray-200 hidden">
+                👆 Haz clic en el mapa para empezar a dibujar
+            </div>
+        </div>
+
+        <div class="w-1/3 bg-white border-l border-gray-200 p-6 overflow-y-auto shadow-xl z-10">
+            
+            <h2 class="text-xl font-bold text-pc-blue mb-6 border-b pb-2">Nuevo Elemento</h2>
+
+            <form id="form-mapa" class="space-y-4">
+                
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Tipo de Incidencia</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" onclick="setModo('punto')" id="btn-punto" class="modo-btn bg-blue-100 text-blue-700 border border-blue-200 py-2 rounded-lg font-bold text-sm hover:bg-blue-200 active:ring-2 ring-blue-500 transition">📍 Punto</button>
+                        <button type="button" onclick="setModo('linea')" id="btn-linea" class="modo-btn bg-gray-50 text-gray-600 border border-gray-200 py-2 rounded-lg font-bold text-sm hover:bg-gray-100 transition">➖ Corte</button>
+                        <button type="button" onclick="setModo('zona')" id="btn-zona" class="modo-btn bg-gray-50 text-gray-600 border border-gray-200 py-2 rounded-lg font-bold text-sm hover:bg-gray-100 transition">⬠ Zona</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Título</label>
+                    <input type="text" id="titulo" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pc-orange outline-none" placeholder="Ej: Corte Calle Mayor" required>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Descripción</label>
+                    <textarea id="descripcion" rows="2" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pc-orange outline-none" placeholder="Motivo, horario..."></textarea>
+                </div>
+
+                <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                    <p class="text-xs font-bold text-blue-800 uppercase mb-2">📅 Programación (Opcional)</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase">Inicio</label>
+                            <input type="datetime-local" id="fecha-inicio" class="w-full px-2 py-1 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase">Fin</label>
+                            <input type="datetime-local" id="fecha-fin" class="w-full px-2 py-1 border rounded text-sm">
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mt-1 italic">* Si lo dejas vacío, será visible siempre.</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Color</label>
+                        <select id="color" class="w-full px-3 py-2 border rounded-lg bg-white">
+                            <option value="azul">Azul (Info)</option>
+                            <option value="rojo">Rojo (Peligro)</option>
+                            <option value="naranja">Naranja (Obras)</option>
+                            <option value="verde">Verde (Seguro)</option>
+                        </select>
+                    </div>
+                    <input type="hidden" id="input-lat"><input type="hidden" id="input-lng"><input type="hidden" id="input-coords">
+                </div>
+
+                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200 text-xs">
+                    <p class="font-bold text-gray-500 mb-1">ESTADO DEL DIBUJO:</p>
+                    <p id="status-coords" class="text-gray-400 italic">Selecciona un tipo y haz clic en el mapa.</p>
+                    <button type="button" onclick="borrarDibujo()" class="mt-2 text-red-500 hover:text-red-700 font-bold underline hidden" id="btn-reset">Borrar trazado</button>
+                </div>
+
+                <button type="submit" class="w-full bg-pc-orange hover:bg-orange-600 text-white font-bold py-4 rounded-xl shadow-lg transition transform active:scale-95">
+                    GUARDAR CAMBIOS
+                </button>
+            </form>
+
+            <div class="mt-10 border-t pt-6">
+                <h3 class="font-bold text-gray-800 mb-4">Elementos Activos</h3>
+                <div id="lista-elementos" class="space-y-2 text-sm"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/config.js"></script>
+
+    <script>
+        const map = L.map('map').setView([38.500, -0.363], 16);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        let capaDibujo = L.layerGroup().addTo(map);
+        let modoActual = 'punto'; 
+        let puntosDibujados = []; 
+
+        const statusText = document.getElementById('status-coords');
+        const btnReset = document.getElementById('btn-reset');
+
+        map.on('click', function(e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+
+            if (modoActual === 'punto') {
+                capaDibujo.clearLayers();
+                L.marker([lat, lng]).addTo(capaDibujo);
+                document.getElementById('input-lat').value = lat;
+                document.getElementById('input-lng').value = lng;
+                statusText.innerText = `Punto fijado.`;
+            } else {
+                puntosDibujados.push([lat, lng]);
+                capaDibujo.clearLayers();
+                puntosDibujados.forEach(p => L.circleMarker(p, { radius: 4, color: 'red' }).addTo(capaDibujo));
+
+                if (modoActual === 'linea') {
+                    L.polyline(puntosDibujados, { color: 'blue' }).addTo(capaDibujo);
+                    statusText.innerText = `Línea: ${puntosDibujados.length} puntos.`;
+                } else if (modoActual === 'zona') {
+                    L.polygon(puntosDibujados, { color: 'orange' }).addTo(capaDibujo);
+                    statusText.innerText = `Zona: ${puntosDibujados.length} vértices.`;
+                }
+                document.getElementById('input-coords').value = JSON.stringify(puntosDibujados);
+                btnReset.classList.remove('hidden');
+            }
+        });
+
+        function setModo(modo) {
+            modoActual = modo;
+            borrarDibujo();
+            document.querySelectorAll('.modo-btn').forEach(b => {
+                b.classList.remove('bg-blue-100', 'text-blue-700', 'ring-2', 'ring-blue-500');
+                b.classList.add('bg-gray-50', 'text-gray-600');
+            });
+            const btnActivo = document.getElementById('btn-' + modo);
+            btnActivo.classList.remove('bg-gray-50', 'text-gray-600');
+            btnActivo.classList.add('bg-blue-100', 'text-blue-700', 'ring-2', 'ring-blue-500');
+            
+            const instrucciones = document.getElementById('instrucciones-mapa');
+            instrucciones.classList.remove('hidden');
+            if(modo === 'punto') instrucciones.innerText = "📍 Haz clic para marcar un punto";
+            if(modo === 'linea') instrucciones.innerText = "➖ Haz clic secuencialmente para trazar";
+            if(modo === 'zona') instrucciones.innerText = "⬠ Haz clic en las esquinas";
+        }
+
+        function borrarDibujo() {
+            capaDibujo.clearLayers();
+            puntosDibujados = [];
+            document.getElementById('input-lat').value = '';
+            document.getElementById('input-lng').value = '';
+            document.getElementById('input-coords').value = '';
+            statusText.innerText = "Esperando clicks...";
+            btnReset.classList.add('hidden');
+        }
+
+        // GUARDAR CON FECHAS
+        document.getElementById('form-mapa').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true; btn.innerText = "Guardando...";
+
+            const titulo = document.getElementById('titulo').value;
+            const desc = document.getElementById('descripcion').value;
+            const color = document.getElementById('color').value;
+            const fechaInicio = document.getElementById('fecha-inicio').value;
+            const fechaFin = document.getElementById('fecha-fin').value;
+
+            let datosInsert = {
+                titulo: titulo,
+                descripcion: desc,
+                tipo: modoActual,
+                color: color,
+                // Si el campo está vacío (""), mandamos null. Si tiene valor, lo mandamos.
+                inicio: fechaInicio ? new Date(fechaInicio) : null,
+                fin: fechaFin ? new Date(fechaFin) : null
+            };
+
+            if (modoActual === 'punto') {
+                datosInsert.lat = document.getElementById('input-lat').value;
+                datosInsert.lng = document.getElementById('input-lng').value;
+                if(!datosInsert.lat) { alert("¡Falta el punto!"); btn.disabled=false; return; }
+            } else {
+                const rawCoords = document.getElementById('input-coords').value;
+                if(!rawCoords) { alert("¡Dibuja primero!"); btn.disabled=false; return; }
+                datosInsert.coordenadas = JSON.parse(rawCoords);
+                if (modoActual === 'zona') datosInsert.relleno = 'yellow';
+            }
+
+            const { error } = await sb.from('mapa_elementos').insert([datosInsert]);
+
+            if (error) { alert("Error: " + error.message); } 
+            else { 
+                alert("✅ Elemento guardado."); 
+                borrarDibujo(); 
+                e.target.reset(); 
+                cargarListaElementos(); 
+            }
+            btn.disabled = false; btn.innerText = "GUARDAR CAMBIOS";
+        });
+
+        async function cargarListaElementos() {
+            const divLista = document.getElementById('lista-elementos');
+            divLista.innerHTML = 'Cargando...';
+            const { data } = await sb.from('mapa_elementos').select('*').order('created_at', {ascending: false});
+            if(data) {
+                divLista.innerHTML = '';
+                data.forEach(el => {
+                    const icono = el.tipo === 'punto' ? '📍' : (el.tipo === 'linea' ? '➖' : '⬠');
+                    let avisoTiempo = '';
+                    if (el.inicio && el.fin) {
+                        const inicio = new Date(el.inicio);
+                        const fin = new Date(el.fin);
+                        const ahora = new Date();
+                        if (ahora < inicio) avisoTiempo = '<span class="text-blue-500 text-[10px] ml-2">(Programado)</span>';
+                        else if (ahora > fin) avisoTiempo = '<span class="text-red-500 text-[10px] ml-2">(Caducado)</span>';
+                        else avisoTiempo = '<span class="text-green-500 text-[10px] ml-2">(Activo ahora)</span>';
+                    } else {
+                        avisoTiempo = '<span class="text-gray-400 text-[10px] ml-2">(Siempre visible)</span>';
+                    }
+
+                    divLista.innerHTML += `
+                        <div class="flex justify-between items-center bg-gray-50 p-2 rounded border hover:bg-white transition mb-1">
+                            <div>
+                                <span class="font-bold text-gray-700">${icono} ${el.titulo}</span> ${avisoTiempo}
+                                <p class="text-xs text-gray-500 truncate w-40">${el.descripcion}</p>
+                            </div>
+                            <button onclick="eliminarElemento(${el.id})" class="text-red-400 hover:text-red-600 p-1">🗑️</button>
+                        </div>
+                    `;
+                });
+            }
+        }
+        async function eliminarElemento(id) {
+            if(confirm("¿Borrar?")) { await sb.from('mapa_elementos').delete().eq('id', id); cargarListaElementos(); }
+        }
+        cargarListaElementos();
+    </script>
+</body>
+</html>

@@ -1,7 +1,6 @@
 let servicios = [];
 let listaUsuarios = []; 
 
-
 document.addEventListener('DOMContentLoaded', () => {
     cargarDatosIniciales();
     cargarDatosMegafonia();
@@ -13,57 +12,44 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==========================================
 
 async function cargarDatosIniciales() {
-    // A. Pedimos la lista de voluntarios para el buscador
     const { data: users, error } = await sb
         .from('perfiles')
         .select('nombre, rol')
         .order('nombre', { ascending: true });
 
-    if (users) {
-        listaUsuarios = users;
-    }
-
-    // B. Cargamos los servicios
+    if (users) listaUsuarios = users;
     cargarServiciosDeNube();
 }
 
-// Carga el estado actual de los paneles de Megafonía y Alerta
 async function cargarDatosMegafonia() {
-    // 1. Megafonía Interna (Voluntarios)
     const { data: anuncio } = await sb.from('anuncios').select('*').eq('id', 1).single();
     if(anuncio) {
         document.getElementById('anuncio-mensaje').value = anuncio.mensaje;
         document.getElementById('anuncio-tipo').value = anuncio.tipo;
     }
 
-    // 2. Alerta Pública (Población)
     const { data: alerta } = await sb.from('alerta_publica').select('*').eq('id', 1).single();
     if(alerta) {
         document.getElementById('publica-mensaje').value = alerta.mensaje;
         document.getElementById('publica-color').value = alerta.color;
-        // Nota: Ya no cargamos 'activa' porque decidimos que siempre sea true
     }
 }
 
 // ==========================================
-// 2. GESTIÓN DE SERVICIOS (Descarga y Orden)
+// 2. GESTIÓN DE SERVICIOS
 // ==========================================
 
 async function cargarServiciosDeNube() {
     const contenedor = document.getElementById('contenedor-servicios');
     contenedor.innerHTML = '<p class="text-center text-gray-400 mt-10">Conectando con base de datos...</p>';
 
-    // Descargamos todo sin ordenar desde la BB.DD.
-    const { data: datosSinOrden, error } = await sb
-        .from('servicios')
-        .select('*');
+    const { data: datosSinOrden, error } = await sb.from('servicios').select('*');
 
     if (error) {
-        alert("Error de conexión al cargar servicios");
+        Swal.fire('Error', 'No se pudieron cargar los servicios.', 'error');
         return;
     }
 
-    // ORDENACIÓN INTELIGENTE EN JS (Fecha + Hora)
     servicios = datosSinOrden.sort((a, b) => {
         const tiempoA = new Date(`${a.fecha}T${a.hora}`);
         const tiempoB = new Date(`${b.fecha}T${b.hora}`);
@@ -81,35 +67,31 @@ function renderizarServicios() {
     contenedorHistorial.innerHTML = '';
 
     const hoy = new Date();
-    hoy.setHours(0,0,0,0); // Ignoramos la hora actual para comparar solo fechas
+    hoy.setHours(0,0,0,0);
 
     const eventosFuturos = [];
     const eventosPasados = [];
 
-    // Separamos futuros y pasados
     servicios.forEach(evento => {
         const fechaEvento = new Date(evento.fecha);
         (fechaEvento >= hoy) ? eventosFuturos.push(evento) : eventosPasados.push(evento);
     });
 
-    // Ordenamos el historial al revés (los más recientes arriba)
     eventosPasados.sort((a, b) => {
         const tiempoA = new Date(`${a.fecha}T${a.hora}`);
         const tiempoB = new Date(`${b.fecha}T${b.hora}`);
         return tiempoB - tiempoA; 
     });
 
-    // Pintamos las tarjetas
     eventosFuturos.forEach(ev => contenedorFuturo.innerHTML += crearTarjetaHTML(ev, false));
     eventosPasados.forEach(ev => contenedorHistorial.innerHTML += crearTarjetaHTML(ev, true));
 
-    // Mensajes de vacío
     if(eventosFuturos.length === 0) contenedorFuturo.innerHTML = '<p class="text-gray-400 italic text-center">No hay servicios próximos.</p>';
     if(eventosPasados.length === 0) contenedorHistorial.innerHTML = '<p class="text-gray-400 italic text-center">No hay historial disponible.</p>';
 }
 
 // ==========================================
-// 3. GENERADOR DE TARJETAS HTML (Visual)
+// 3. GENERADOR DE TARJETAS HTML
 // ==========================================
 
 function crearTarjetaHTML(evento, esHistorial) {
@@ -117,7 +99,6 @@ function crearTarjetaHTML(evento, esHistorial) {
     const listaEquipo = evento.equipo || []; 
     const listaCandidatos = evento.candidatos || []; 
 
-    // A. PINTAR EQUIPO CONFIRMADO
     listaEquipo.forEach((voluntario, iVol) => {
         htmlEquipo += `
             <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100 mb-2 shadow-sm">
@@ -130,12 +111,11 @@ function crearTarjetaHTML(evento, esHistorial) {
                         <p class="text-xs text-gray-500 bg-white px-2 py-0.5 rounded border border-gray-200 inline-block mt-1">${voluntario.puesto}</p>
                     </div>
                 </div>
-                ${!esHistorial ? `<button onclick="borrarVoluntario(${evento.id}, ${iVol})" class="text-red-300 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition">🗑️</button>` : ''}
+                ${!esHistorial ? `<button onclick="borrarVoluntario(${evento.id}, ${iVol})" class="text-red-300 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition" title="Sacar del equipo">🗑️</button>` : ''}
             </div>
         `;
     });
 
-    // B. PINTAR SOLICITUDES PENDIENTES (Candidatos)
     let htmlCandidatos = '';
     if (!esHistorial && listaCandidatos.length > 0) {
         htmlCandidatos += `<div class="mb-4 bg-yellow-50 border border-yellow-200 rounded-xl p-3">
@@ -155,23 +135,19 @@ function crearTarjetaHTML(evento, esHistorial) {
         htmlCandidatos += `</div>`;
     }
 
-    // C. FORMULARIO DE ASIGNACIÓN DIRECTA
     let opcionesHTML = '';
     listaUsuarios.forEach(usuario => { opcionesHTML += `<option value="${usuario.nombre}">${usuario.rol}</option>`; });
     const dataListID = `lista-voluntarios-${evento.id}`;
 
     const formularioHTML = !esHistorial ? `
         <form onsubmit="anadirVoluntario(event, ${evento.id})" class="mt-4 flex flex-col md:flex-row gap-3 border-t border-gray-100 pt-4">
-            
             <div class="w-full md:w-1/2 relative">
                 <input list="${dataListID}" name="nombre" class="w-full pl-3 pr-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pc-orange" placeholder="Buscar voluntario..." required autocomplete="off">
                 <datalist id="${dataListID}">${opcionesHTML}</datalist>
             </div>
-            
             <div class="w-full md:w-1/3 relative">
                 <input type="text" name="puesto" placeholder="Puesto (ej: Conductor)..." class="w-full pl-3 pr-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pc-orange">
             </div>
-
             <button type="submit" class="w-full md:w-auto bg-blue-100 hover:bg-blue-200 text-pc-blue border border-blue-200 px-4 py-2.5 rounded-lg text-sm font-bold shadow-sm transition flex items-center justify-center gap-2">
                 <span>➕</span> Añadir
             </button>
@@ -193,12 +169,9 @@ function crearTarjetaHTML(evento, esHistorial) {
                     </div>
                     <button onclick="borrarEvento(${evento.id})" class="text-gray-300 hover:text-red-500 transition p-1" title="Borrar Evento">🗑️</button>
                 </div>
-                
                 <p class="text-gray-600 text-sm mb-5 italic border-l-4 border-gray-200 pl-3">"${evento.descripcion}"</p>
                 <hr class="border-gray-100 my-4">
-                
                 ${htmlCandidatos}
-
                 <div>
                     <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">👥 Equipo Confirmado</h3>
                     <div class="space-y-2">
@@ -227,7 +200,12 @@ document.getElementById('form-servicio').addEventListener('submit', async functi
         equipo: []
     };
     const { error } = await sb.from('servicios').insert([nuevoEvento]);
-    if (!error) { cerrarModal(); this.reset(); cargarServiciosDeNube(); }
+    if (!error) { 
+        cerrarModal(); 
+        this.reset(); 
+        cargarServiciosDeNube();
+        Swal.fire({ icon: 'success', title: 'Servicio Creado', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+    }
 });
 
 // AÑADIR VOLUNTARIO (MANUAL)
@@ -237,17 +215,20 @@ async function anadirVoluntario(e, idEvento) {
     const inputPuesto = e.target.puesto;
     
     const eventoActual = servicios.find(s => s.id === idEvento);
-
-    // Evitamos duplicados
     const yaExiste = eventoActual.equipo.some(v => v.nombre === inputNombre.value);
+    
     if(yaExiste) {
-        alert("¡Este voluntario ya está asignado a este servicio!");
+        Swal.fire('¡Atención!', 'Este voluntario ya está asignado.', 'warning');
         return;
     }
 
     const nuevoEquipo = [...eventoActual.equipo, { nombre: inputNombre.value, puesto: inputPuesto.value || "General" }];
     const { error } = await sb.from('servicios').update({ equipo: nuevoEquipo }).eq('id', idEvento);
-    if (!error) { cargarServiciosDeNube(); }
+    if (!error) { 
+        cargarServiciosDeNube(); 
+        const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
+        Toast.fire({ icon: 'success', title: 'Voluntario añadido' });
+    }
 }
 
 // BORRAR VOLUNTARIO
@@ -255,15 +236,29 @@ async function borrarVoluntario(idEvento, indexVoluntario) {
     const eventoActual = servicios.find(s => s.id === idEvento);
     const nuevoEquipo = [...eventoActual.equipo];
     nuevoEquipo.splice(indexVoluntario, 1);
+    
     const { error } = await sb.from('servicios').update({ equipo: nuevoEquipo }).eq('id', idEvento);
-    if (!error) { cargarServiciosDeNube(); }
+    if (!error) cargarServiciosDeNube();
 }
 
 // BORRAR EVENTO COMPLETO
 async function borrarEvento(id) {
-    if(confirm("¿Borrar este servicio?")) {
+    const result = await Swal.fire({
+        title: '¿Borrar servicio?',
+        text: "Se eliminará toda la planificación y el equipo asignado.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Sí, borrar',
+        cancelButtonText: 'Cancelar'
+    });
+
+    if(result.isConfirmed) {
         const { error } = await sb.from('servicios').delete().eq('id', id);
-        if (!error) { cargarServiciosDeNube(); }
+        if (!error) { 
+            cargarServiciosDeNube();
+            Swal.fire({ icon: 'success', title: 'Eliminado', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+        }
     }
 }
 
@@ -275,40 +270,36 @@ async function aceptarCandidato(idEvento, indexCandidato) {
     const evento = servicios.find(s => s.id === idEvento);
     const candidato = evento.candidatos[indexCandidato];
 
-    // 1. Lo añadimos al equipo oficial
-    const nuevoEquipo = [...evento.equipo, { 
-        nombre: candidato.nombre, 
-        puesto: "General" 
-    }];
-
-    // 2. Lo borramos de la lista de candidatos
+    const nuevoEquipo = [...evento.equipo, { nombre: candidato.nombre, puesto: "General" }];
     const nuevosCandidatos = [...evento.candidatos];
     nuevosCandidatos.splice(indexCandidato, 1);
 
-    // 3. Guardamos ambos cambios
-    const { error } = await sb
-        .from('servicios')
-        .update({ 
-            equipo: nuevoEquipo,
-            candidatos: nuevosCandidatos
-        })
-        .eq('id', idEvento);
+    const { error } = await sb.from('servicios').update({ equipo: nuevoEquipo, candidatos: nuevosCandidatos }).eq('id', idEvento);
 
-    if (!error) cargarServiciosDeNube();
+    if (!error) {
+        cargarServiciosDeNube();
+        const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
+        Toast.fire({ icon: 'success', title: 'Candidato Aceptado' });
+    }
 }
 
 async function rechazarCandidato(idEvento, indexCandidato) {
-    if(!confirm("¿Rechazar solicitud?")) return;
+    const result = await Swal.fire({
+        title: '¿Rechazar solicitud?',
+        text: "El voluntario será eliminado de la lista de pendientes.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Rechazar'
+    });
+
+    if(!result.isConfirmed) return;
 
     const evento = servicios.find(s => s.id === idEvento);
     const nuevosCandidatos = [...evento.candidatos];
     nuevosCandidatos.splice(indexCandidato, 1);
 
-    const { error } = await sb
-        .from('servicios')
-        .update({ candidatos: nuevosCandidatos })
-        .eq('id', idEvento);
-
+    const { error } = await sb.from('servicios').update({ candidatos: nuevosCandidatos }).eq('id', idEvento);
     if (!error) cargarServiciosDeNube();
 }
 
@@ -316,7 +307,7 @@ async function rechazarCandidato(idEvento, indexCandidato) {
 // 6. ZONA DE ALERTAS (Megafonía y Pública)
 // ==========================================
 
-// A. PUBLICAR ANUNCIO INTERNO (VOLUNTARIOS)
+// A. PUBLICAR ANUNCIO INTERNO
 async function publicarAnuncio(e) {
     e.preventDefault();
     const mensaje = document.getElementById('anuncio-mensaje').value;
@@ -329,13 +320,16 @@ async function publicarAnuncio(e) {
         mensaje: mensaje, tipo: tipo, created_at: new Date() 
     }).eq('id', 1);
 
-    if (!error) alert("📢 Tablón interno actualizado.");
-    else alert("Error: " + error.message);
+    if (!error) {
+        Swal.fire({ icon: 'success', title: 'Tablón Actualizado', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+    } else {
+        Swal.fire('Error', error.message, 'error');
+    }
 
     btn.innerText = "Publicar"; btn.disabled = false;
 }
 
-// B. PUBLICAR ALERTA PÚBLICA (VECINOS)
+// B. PUBLICAR ALERTA PÚBLICA
 async function publicarAlertaPublica(e) {
     e.preventDefault();
     
@@ -346,53 +340,44 @@ async function publicarAlertaPublica(e) {
     btn.innerText = "Enviando..."; btn.disabled = true;
 
     const { error } = await sb.from('alerta_publica').update({ 
-        mensaje: mensaje, 
-        color: color, 
-        activa: true, // SIEMPRE VISIBLE
-        created_at: new Date() 
+        mensaje: mensaje, color: color, activa: true, created_at: new Date() 
     }).eq('id', 1);
 
-    if (!error) alert("🚨 Web pública actualizada correctamente.");
-    else alert("Error: " + error.message);
+    if (!error) {
+        Swal.fire({ icon: 'success', title: 'Web Pública Actualizada', text: 'El aviso ya es visible para los vecinos.', confirmButtonColor: '#003366' });
+    } else {
+        Swal.fire('Error', error.message, 'error');
+    }
 
     btn.innerText = "Actualizar Web"; btn.disabled = false;
 }
 
 // ==========================================
-// 7. FUNCIONES AUXILIARES (MODAL)
+// 7. FUNCIONES AUXILIARES
 // ==========================================
 function abrirModalServicio() { document.getElementById('modal-servicio').classList.remove('hidden'); }
 function cerrarModal() { document.getElementById('modal-servicio').classList.add('hidden'); }
 
 // ==========================================
-// 8. ESTADÍSTICAS Y CONTROL HORARIO
+// 8. ESTADÍSTICAS
 // ==========================================
 
 async function cargarEstadisticas() {
-    // 1. Descargar todos los registros que tengan salida (los terminados)
     const { data: registros, error } = await sb
         .from('registro_horas')
         .select('*')
         .not('salida', 'is', null)
-        .order('salida', { ascending: false }); // Los más recientes primero
+        .order('salida', { ascending: false });
 
     if (error) return;
 
-    // 2. Procesar datos para el RANKING
     const ranking = {};
-
     registros.forEach(reg => {
-        const entrada = new Date(reg.entrada);
-        const salida = new Date(reg.salida);
-        const diffMs = salida - entrada; // Diferencia en milisegundos
-
-        if (!ranking[reg.usuario]) {
-            ranking[reg.usuario] = 0;
-        }
+        const diffMs = new Date(reg.salida) - new Date(reg.entrada);
+        if (!ranking[reg.usuario]) ranking[reg.usuario] = 0;
         ranking[reg.usuario] += diffMs;
     });
 
-    // Convertir objeto a array y ordenar por horas (descendente)
     const rankingArray = Object.entries(ranking)
         .map(([nombre, ms]) => ({ nombre, ms }))
         .sort((a, b) => b.ms - a.ms);
@@ -411,11 +396,8 @@ function renderizarRanking(lista) {
     }
 
     lista.forEach((vol, index) => {
-        // Formatear tiempo (Ej: 12h 30m)
         const horas = Math.floor(vol.ms / 3600000);
         const mins = Math.floor((vol.ms % 3600000) / 60000);
-        
-        // Medallas
         let medalla = '';
         let claseFila = 'border-b border-gray-50 hover:bg-gray-50';
         if (index === 0) { medalla = '🥇'; claseFila = 'bg-yellow-50 border-b border-yellow-100'; }
@@ -424,13 +406,8 @@ function renderizarRanking(lista) {
 
         tbody.innerHTML += `
             <tr class="${claseFila} transition">
-                <td class="px-6 py-3 font-medium text-gray-700 flex items-center gap-2">
-                    <span class="w-6 text-center">${medalla || (index + 1) + '.'}</span>
-                    ${vol.nombre}
-                </td>
-                <td class="px-6 py-3 text-right text-pc-blue font-bold">
-                    ${horas}h ${mins}m
-                </td>
+                <td class="px-6 py-3 font-medium text-gray-700 flex items-center gap-2"><span class="w-6 text-center">${medalla || (index + 1) + '.'}</span>${vol.nombre}</td>
+                <td class="px-6 py-3 text-right text-pc-blue font-bold">${horas}h ${mins}m</td>
             </tr>
         `;
     });
@@ -440,14 +417,11 @@ function renderizarUltimosRegistros(lista) {
     const tbody = document.getElementById('tabla-registros');
     tbody.innerHTML = '';
 
-    // Mostramos solo los últimos 50 movimientos
     lista.slice(0, 50).forEach(reg => {
         const fecha = new Date(reg.entrada).toLocaleDateString();
         const duracionMs = new Date(reg.salida) - new Date(reg.entrada);
         const horas = Math.floor(duracionMs / 3600000);
         const mins = Math.floor((duracionMs % 3600000) / 60000);
-
-        // Colorcito según actividad
         let colorDot = 'bg-gray-400';
         if (reg.actividad === 'Guardia') colorDot = 'bg-green-500';
         if (reg.actividad === 'Preventivo') colorDot = 'bg-purple-500';
@@ -464,9 +438,7 @@ function renderizarUltimosRegistros(lista) {
                         </div>
                     </div>
                 </td>
-                <td class="px-6 py-3 text-right whitespace-nowrap text-gray-500">
-                    ${horas}h ${mins}m
-                </td>
+                <td class="px-6 py-3 text-right whitespace-nowrap text-gray-500">${horas}h ${mins}m</td>
             </tr>
         `;
     });

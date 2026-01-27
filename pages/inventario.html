@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Intranet - Inventario</title>
+    <title>Inventario de Material</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            theme: { extend: { colors: { pc: { orange: '#FF6600', blue: '#003366' } } } }
-        }
+        tailwind.config = { theme: { extend: { colors: { pc: { orange: '#FF6600', blue: '#003366' } } } } }
     </script>
 </head>
 <body class="bg-gray-100 font-sans min-h-screen flex flex-col">
@@ -20,45 +19,52 @@
         </div>
     </nav>
 
-    <main class="container mx-auto px-4 py-8 max-w-4xl">
+    <main class="container mx-auto px-4 py-8 max-w-6xl">
         
-        <h1 class="text-3xl font-bold text-gray-800 mb-6">📦 Inventario de Material</h1>
-
-        <div class="bg-orange-50 border border-orange-200 rounded-xl p-6 mb-8 shadow-sm">
-            <h2 class="text-xl font-bold text-orange-800 mb-4 flex items-center gap-2">🎒 Mi Mochila (A devolver)</h2>
-            <div id="mis-prestamos" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <p class="text-gray-400 text-sm italic">No tienes material asignado ahora mismo.</p>
+        <div class="mb-6 flex items-center gap-3">
+            <span class="text-4xl">📦</span>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">Inventario de Material</h1>
+                <p class="text-sm text-gray-500">Control de material y préstamos.</p>
             </div>
         </div>
 
-        <div class="bg-white border border-gray-200 rounded-xl p-6 mb-8 shadow-sm">
-            <h2 class="text-xl font-bold text-pc-blue mb-4 flex items-center gap-2">🏢 Almacén (Disponible)</h2>
-            <div id="grid-almacen" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                </div>
+        <div class="bg-orange-50 border border-orange-200 rounded-xl p-6 mb-8 shadow-sm">
+            <h2 class="font-bold text-pc-orange mb-4 flex items-center gap-2">
+                🎒 Mi Mochila <span class="text-xs font-normal text-orange-600 bg-orange-100 px-2 py-1 rounded-full">(A devolver)</span>
+            </h2>
+            <div id="mis-prestamos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <p class="text-gray-400 italic text-sm col-span-full text-center py-4">Cargando tu mochila...</p>
+            </div>
         </div>
 
-        <div id="panel-jefe" class="hidden bg-gray-200 border border-gray-300 rounded-xl p-4 md:p-6 mb-10">
-            <h2 class="text-lg md:text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
-                👮‍♂️ Panel de Control (Jefe)
+        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <h2 class="font-bold text-pc-blue mb-4 flex items-center gap-2">
+                🏢 Almacén <span class="text-xs font-normal text-blue-600 bg-blue-100 px-2 py-1 rounded-full">(Disponible)</span>
             </h2>
+            <div id="grid-almacen" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <p class="text-gray-400 italic text-center col-span-full py-10">Conectando con base de datos...</p>
+            </div>
+        </div>
+
+        <div id="panel-jefe" class="hidden mt-8 bg-gray-200 rounded-xl p-6 border border-gray-300">
+            <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2">👮‍♂️ Panel de Logística (Jefatura)</h3>
             
-            <div class="flex flex-col md:flex-row gap-6">
-                
-                <div class="md:w-1/2">
-                    <h3 class="font-bold text-xs md:text-sm uppercase text-gray-500 mb-2">Dar de alta material</h3>
-                    <form id="form-nuevo-item" class="flex flex-col md:flex-row gap-2">
-                        <input type="text" id="nuevo-nombre" placeholder="Ej: Conos" class="flex-1 px-3 py-2 rounded border text-sm" required>
-                        <div class="flex gap-2">
-                            <input type="number" id="nuevo-stock" placeholder="Cant." class="w-20 px-3 py-2 rounded border text-sm" required>
-                            <button type="submit" class="bg-pc-blue text-white px-4 py-2 rounded font-bold hover:bg-blue-800 flex-1 md:flex-none text-sm">+</button>
-                        </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-4 rounded shadow-sm">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">DAR DE ALTA NUEVO MATERIAL</label>
+                    <form id="form-nuevo-item" class="flex gap-2">
+                        <input type="text" id="nuevo-nombre" placeholder="Ej: Conos" class="flex-1 p-2 rounded border text-sm outline-none focus:ring-2 focus:ring-pc-blue" required>
+                        <input type="number" id="nuevo-stock" placeholder="Cant." class="w-20 p-2 rounded border text-sm outline-none focus:ring-2 focus:ring-pc-blue" required>
+                        <button type="submit" class="bg-pc-blue text-white px-4 rounded font-bold hover:bg-blue-800 transition">+</button>
                     </form>
                 </div>
-
-                <div class="md:w-1/2 border-t md:border-t-0 md:border-l border-gray-300 pt-4 md:pt-0 pl-0 md:pl-6">
-                    <h3 class="font-bold text-xs md:text-sm uppercase text-red-500 mb-2">🔍 Material en la calle (Sin devolver)</h3>
-                    <ul id="lista-morosos" class="text-xs md:text-sm space-y-2 max-h-40 overflow-y-auto bg-gray-100 p-2 rounded-lg border border-gray-300">
-                        </ul>
+                
+                <div class="bg-white p-4 rounded shadow-sm">
+                    <label class="block text-xs font-bold text-red-500 uppercase mb-2">🔍 MATERIAL EN LA CALLE (SIN DEVOLVER)</label>
+                    <ul id="lista-morosos" class="max-h-40 overflow-y-auto text-sm space-y-2">
+                        <li class="text-gray-400 italic text-xs text-center">Cargando...</li>
+                    </ul>
                 </div>
             </div>
         </div>

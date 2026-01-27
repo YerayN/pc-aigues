@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Editor de Mapa Público</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script>
         tailwind.config = { theme: { extend: { colors: { pc: { orange: '#FF6600', blue: '#003366' } } } } }
     </script>
     <style>
-        /* Evitar el rebote en móvil */
         body { overscroll-behavior: none; }
     </style>
 </head>
@@ -19,10 +19,8 @@
     <script>
         (function() {
             const rol = localStorage.getItem('pc_rol');
-            // Si no hay rol o no es ni admin ni jefe...
             if (!rol || (rol !== 'admin' && rol !== 'jefe')) {
-                alert("⛔ Acceso Denegado: Zona restringida a Coordinación.");
-                window.location.href = 'dashboard.html'; // ¡FUERA!
+                window.location.href = 'dashboard.html';
             }
         })();
     </script>
@@ -39,8 +37,8 @@
         <div class="w-full md:w-2/3 h-[45%] md:h-full relative z-0 order-1">
             <div id="map" class="w-full h-full"></div>
             
-            <div id="instrucciones-mapa" class="absolute top-2 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur px-3 py-1.5 rounded-full shadow-lg text-xs md:text-sm font-bold text-gray-700 z-[400] border border-gray-200 hidden whitespace-nowrap">
-                👆 Clica en el mapa
+            <div id="instrucciones-mapa" class="absolute top-2 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-lg text-xs md:text-sm font-bold text-pc-blue z-[400] border border-blue-200 hidden whitespace-nowrap flex items-center gap-2">
+                <span>📍</span> <span id="texto-instruccion">Clica en el mapa</span>
             </div>
         </div>
 
@@ -74,7 +72,7 @@
                     <div class="grid grid-cols-2 gap-3">
                          <div>
                             <label class="block text-[10px] md:text-xs font-bold text-gray-500 uppercase mb-1">Color</label>
-                            <select id="color" class="w-full px-2 py-2 border rounded-lg bg-white text-sm">
+                            <select id="color" class="w-full px-2 py-2 border rounded-lg bg-white text-sm cursor-pointer">
                                 <option value="azul">🔵 Azul (Info)</option>
                                 <option value="rojo">🔴 Rojo (Peligro)</option>
                                 <option value="naranja">🟠 Naranja (Obras)</option>
@@ -105,18 +103,22 @@
                 <input type="hidden" id="input-lat"><input type="hidden" id="input-lng"><input type="hidden" id="input-coords">
 
                 <div class="bg-gray-50 p-2 rounded-lg border border-gray-200 text-xs flex justify-between items-center">
-                    <span id="status-coords" class="text-gray-500 italic truncate">Selecciona tipo y dibuja arriba 👆</span>
-                    <button type="button" onclick="borrarDibujo()" class="text-red-500 font-bold hidden px-2 py-1 border border-red-200 rounded bg-white" id="btn-reset">Borrar</button>
+                    <span id="status-coords" class="text-gray-500 italic truncate font-medium">Selecciona tipo y dibuja 👆</span>
+                    <button type="button" onclick="borrarDibujo()" class="text-red-500 font-bold hidden px-2 py-1 border border-red-200 rounded bg-white hover:bg-red-50 transition" id="btn-reset">Borrar</button>
                 </div>
 
-                <button type="submit" class="w-full bg-pc-orange hover:bg-orange-600 text-white font-bold py-3 rounded-xl shadow-lg transition transform active:scale-95 text-sm md:text-base">
-                    GUARDAR CAMBIOS
+                <button type="submit" class="w-full bg-pc-orange hover:bg-orange-600 text-white font-bold py-3 rounded-xl shadow-lg transition transform active:scale-95 text-sm md:text-base flex justify-center items-center gap-2">
+                    <span>💾</span> GUARDAR CAMBIOS
                 </button>
             </form>
 
             <div class="mt-8 border-t pt-4">
-                <h3 class="font-bold text-gray-800 mb-2 text-sm">Elementos Activos</h3>
-                <div id="lista-elementos" class="space-y-2 text-xs"></div>
+                <h3 class="font-bold text-gray-800 mb-3 text-sm flex items-center gap-2">
+                    📡 Elementos Activos <span class="text-xs font-normal text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full" id="contador-elementos">0</span>
+                </h3>
+                <div id="lista-elementos" class="space-y-2 text-xs">
+                    <p class="text-center text-gray-400 py-4">Cargando mapa...</p>
+                </div>
             </div>
 
         </div>
@@ -125,151 +127,5 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../assets/js/config.js"></script>
-
-    <script>
-        const map = L.map('map').setView([38.500, -0.363], 16);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-        let capaDibujo = L.layerGroup().addTo(map);
-        let modoActual = 'punto'; 
-        let puntosDibujados = []; 
-
-        const statusText = document.getElementById('status-coords');
-        const btnReset = document.getElementById('btn-reset');
-
-        map.on('click', function(e) {
-            const lat = e.latlng.lat;
-            const lng = e.latlng.lng;
-
-            if (modoActual === 'punto') {
-                capaDibujo.clearLayers();
-                L.marker([lat, lng]).addTo(capaDibujo);
-                document.getElementById('input-lat').value = lat;
-                document.getElementById('input-lng').value = lng;
-                statusText.innerText = "Punto marcado ✅";
-            } else {
-                puntosDibujados.push([lat, lng]);
-                capaDibujo.clearLayers();
-                puntosDibujados.forEach(p => L.circleMarker(p, { radius: 4, color: 'red' }).addTo(capaDibujo));
-
-                if (modoActual === 'linea') {
-                    L.polyline(puntosDibujados, { color: 'blue' }).addTo(capaDibujo);
-                    statusText.innerText = `Línea (${puntosDibujados.length} pts)`;
-                } else if (modoActual === 'zona') {
-                    L.polygon(puntosDibujados, { color: 'orange' }).addTo(capaDibujo);
-                    statusText.innerText = `Zona (${puntosDibujados.length} vértices)`;
-                }
-                document.getElementById('input-coords').value = JSON.stringify(puntosDibujados);
-                btnReset.classList.remove('hidden');
-            }
-        });
-
-        function setModo(modo) {
-            modoActual = modo;
-            borrarDibujo();
-            document.querySelectorAll('.modo-btn').forEach(b => {
-                b.classList.remove('bg-blue-100', 'text-blue-700', 'ring-2', 'ring-blue-500');
-                b.classList.add('bg-gray-50', 'text-gray-600');
-            });
-            const btnActivo = document.getElementById('btn-' + modo);
-            btnActivo.classList.remove('bg-gray-50', 'text-gray-600');
-            btnActivo.classList.add('bg-blue-100', 'text-blue-700', 'ring-2', 'ring-blue-500');
-            
-            const instrucciones = document.getElementById('instrucciones-mapa');
-            instrucciones.classList.remove('hidden');
-            if(modo === 'punto') instrucciones.innerText = "📍 Toca en el mapa";
-            if(modo === 'linea') instrucciones.innerText = "➖ Toca varios puntos";
-            if(modo === 'zona') instrucciones.innerText = "⬠ Cierra el área";
-        }
-
-        function borrarDibujo() {
-            capaDibujo.clearLayers();
-            puntosDibujados = [];
-            document.getElementById('input-lat').value = '';
-            document.getElementById('input-lng').value = '';
-            document.getElementById('input-coords').value = '';
-            statusText.innerText = "Dibuja en el mapa 👆";
-            btnReset.classList.add('hidden');
-        }
-
-        document.getElementById('form-mapa').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]');
-            btn.disabled = true; btn.innerText = "Guardando...";
-
-            const titulo = document.getElementById('titulo').value;
-            const desc = document.getElementById('descripcion').value;
-            const color = document.getElementById('color').value;
-            const fechaInicio = document.getElementById('fecha-inicio').value;
-            const fechaFin = document.getElementById('fecha-fin').value;
-
-            let datosInsert = {
-                titulo: titulo,
-                descripcion: desc,
-                tipo: modoActual,
-                color: color,
-                inicio: fechaInicio ? new Date(fechaInicio) : null,
-                fin: fechaFin ? new Date(fechaFin) : null
-            };
-
-            if (modoActual === 'punto') {
-                datosInsert.lat = document.getElementById('input-lat').value;
-                datosInsert.lng = document.getElementById('input-lng').value;
-                if(!datosInsert.lat) { alert("¡Marca un punto!"); btn.disabled=false; btn.innerText="GUARDAR CAMBIOS"; return; }
-            } else {
-                const rawCoords = document.getElementById('input-coords').value;
-                if(!rawCoords) { alert("¡Dibuja algo!"); btn.disabled=false; btn.innerText="GUARDAR CAMBIOS"; return; }
-                datosInsert.coordenadas = JSON.parse(rawCoords);
-                if (modoActual === 'zona') datosInsert.relleno = 'yellow';
-            }
-
-            const { error } = await sb.from('mapa_elementos').insert([datosInsert]);
-
-            if (error) { alert("Error: " + error.message); } 
-            else { 
-                alert("✅ Guardado."); 
-                borrarDibujo(); 
-                e.target.reset(); 
-                cargarListaElementos(); 
-            }
-            btn.disabled = false; btn.innerText = "GUARDAR CAMBIOS";
-        });
-
-        async function cargarListaElementos() {
-            const divLista = document.getElementById('lista-elementos');
-            divLista.innerHTML = 'Cargando...';
-            const { data } = await sb.from('mapa_elementos').select('*').order('created_at', {ascending: false});
-            if(data) {
-                divLista.innerHTML = '';
-                data.forEach(el => {
-                    const icono = el.tipo === 'punto' ? '📍' : (el.tipo === 'linea' ? '➖' : '⬠');
-                    let colorStatus = "text-gray-400";
-                    if (el.inicio && el.fin) {
-                        const ahora = new Date();
-                        if (ahora >= new Date(el.inicio) && ahora <= new Date(el.fin)) colorStatus = "text-green-500";
-                        else if (ahora < new Date(el.inicio)) colorStatus = "text-blue-500";
-                        else colorStatus = "text-red-500";
-                    }
-
-                    divLista.innerHTML += `
-                        <div class="flex justify-between items-center bg-gray-50 p-2 rounded border hover:bg-white transition mb-1">
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-1">
-                                    <span class="font-bold text-gray-700 truncate">${icono} ${el.titulo}</span>
-                                    <span class="text-[10px] ${colorStatus}">●</span>
-                                </div>
-                                <p class="text-[10px] text-gray-500 truncate">${el.descripcion || 'Sin descripción'}</p>
-                            </div>
-                            <button onclick="eliminarElemento(${el.id})" class="text-red-400 hover:text-red-600 p-2 ml-2">🗑️</button>
-                        </div>
-                    `;
-                });
-            }
-        }
-        async function eliminarElemento(id) {
-            if(confirm("¿Borrar?")) { await sb.from('mapa_elementos').delete().eq('id', id); cargarListaElementos(); }
-        }
-        cargarListaElementos();
-    </script>
-</body>
+    <script src="../assets/js/admin_mapa.js"></script> </body>
 </html>

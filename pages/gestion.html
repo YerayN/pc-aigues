@@ -4,17 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Intranet - Planificación</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            theme: {
-                extend: { colors: { pc: { orange: '#FF6600', blue: '#003366' } } }
-            }
+            theme: { extend: { colors: { pc: { orange: '#FF6600', blue: '#003366' } } } }
         }
     </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../assets/js/config.js"></script>
 </head>
 <body class="bg-gray-100 font-sans min-h-screen flex flex-col">
 
@@ -103,8 +99,7 @@
             </form>
         </div>
 
-        <div id="contenedor-servicios" class="space-y-6">
-            </div>
+        <div id="contenedor-servicios" class="space-y-6"></div>
 
         <hr class="my-10 border-gray-200">
 
@@ -141,8 +136,7 @@
                     </div>
                     <div class="overflow-y-auto flex-1 p-0">
                         <table class="w-full text-left border-collapse">
-                            <tbody id="tabla-registros" class="text-xs">
-                                </tbody>
+                            <tbody id="tabla-registros" class="text-xs"></tbody>
                         </table>
                     </div>
                 </div>
@@ -157,8 +151,7 @@
             </h2>
         </div>
 
-        <div id="contenedor-historial" class="space-y-6 opacity-75 grayscale hover:grayscale-0 transition duration-500">
-            </div>
+        <div id="contenedor-historial" class="space-y-6 opacity-75 grayscale hover:grayscale-0 transition duration-500"></div>
 
     </main>
 
@@ -195,6 +188,8 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/config.js"></script>
     <script src="../assets/js/gestion.js"></script>
 </body>
 </html>

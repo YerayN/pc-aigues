@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Intranet - Inicio</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -62,15 +63,12 @@
     </div>
 
     <main class="container mx-auto px-4 -mt-20 pb-12">
-        
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
             <a href="calendario.html" class="group bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden">
                 <div class="absolute top-0 right-0 bg-blue-50 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
                 <div class="relative z-10">
-                    <div class="w-14 h-14 bg-blue-100 text-pc-blue rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm group-hover:bg-pc-blue group-hover:text-white transition-colors">
-                        📅
-                    </div>
+                    <div class="w-14 h-14 bg-blue-100 text-pc-blue rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm group-hover:bg-pc-blue group-hover:text-white transition-colors">📅</div>
                     <h3 class="font-bold text-gray-800 text-lg">Calendario</h3>
                     <p class="text-sm text-gray-500 mt-2">Próximos eventos y tus convocatorias.</p>
                 </div>
@@ -79,9 +77,7 @@
             <a href="partes.html" class="group bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden">
                 <div class="absolute top-0 right-0 bg-rose-50 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
                 <div class="relative z-10">
-                    <div class="w-14 h-14 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm group-hover:bg-rose-600 group-hover:text-white transition-colors">
-                        📝
-                    </div>
+                    <div class="w-14 h-14 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm group-hover:bg-rose-600 group-hover:text-white transition-colors">📝</div>
                     <h3 class="font-bold text-gray-800 text-lg">Nuevo Parte</h3>
                     <p class="text-sm text-gray-500 mt-2">Registrar incidencia, accidente o actuación.</p>
                 </div>
@@ -90,9 +86,7 @@
             <a href="documentos.html" class="group bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden">
                 <div class="absolute top-0 right-0 bg-green-50 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
                 <div class="relative z-10">
-                    <div class="w-14 h-14 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm group-hover:bg-green-600 group-hover:text-white transition-colors">
-                        📂
-                    </div>
+                    <div class="w-14 h-14 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm group-hover:bg-green-600 group-hover:text-white transition-colors">📂</div>
                     <h3 class="font-bold text-gray-800 text-lg">Documentos</h3>
                     <p class="text-sm text-gray-500 mt-2">Protocolos, guías y normativa.</p>
                 </div>
@@ -101,9 +95,7 @@
             <a href="inventario.html" class="group bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden">
                 <div class="absolute top-0 right-0 bg-yellow-50 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
                 <div class="relative z-10">
-                    <div class="w-14 h-14 bg-yellow-100 text-yellow-600 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm group-hover:bg-yellow-500 group-hover:text-white transition-colors">
-                        📦
-                    </div>
+                    <div class="w-14 h-14 bg-yellow-100 text-yellow-600 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm group-hover:bg-yellow-500 group-hover:text-white transition-colors">📦</div>
                     <h3 class="font-bold text-gray-800 text-lg">Inventario</h3>
                     <p class="text-sm text-gray-500 mt-2">Control de material y préstamos.</p>
                 </div>
@@ -112,9 +104,7 @@
             <a href="perfil.html" class="group bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden">
                 <div class="absolute top-0 right-0 bg-purple-50 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
                 <div class="relative z-10">
-                    <div class="w-14 h-14 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm group-hover:bg-purple-600 group-hover:text-white transition-colors">
-                        👤
-                    </div>
+                    <div class="w-14 h-14 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm group-hover:bg-purple-600 group-hover:text-white transition-colors">👤</div>
                     <h3 class="font-bold text-gray-800 text-lg">Mi Ficha</h3>
                     <p class="text-sm text-gray-500 mt-2">Tus datos personales y rango.</p>
                 </div>
@@ -123,9 +113,7 @@
             <a href="gestion.html" id="btn-gestion" class="hidden group bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden">
                 <div class="absolute top-0 right-0 bg-orange-50 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
                 <div class="relative z-10">
-                    <div class="w-14 h-14 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm group-hover:bg-pc-orange group-hover:text-white transition-colors">
-                        📋
-                    </div>
+                    <div class="w-14 h-14 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm group-hover:bg-pc-orange group-hover:text-white transition-colors">📋</div>
                     <h3 class="font-bold text-gray-800 text-lg">Gestión Jefatura</h3>
                     <p class="text-sm text-gray-500 mt-2">Planificación, alertas y servicios.</p>
                 </div>
@@ -134,9 +122,7 @@
             <a href="admin_mapa.html" id="btn-mapa-admin" class="hidden group bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden">
                 <div class="absolute top-0 right-0 bg-gray-100 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
                 <div class="relative z-10">
-                    <div class="w-14 h-14 bg-gray-100 text-gray-600 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm group-hover:bg-gray-800 group-hover:text-white transition-colors">
-                        🗺️
-                    </div>
+                    <div class="w-14 h-14 bg-gray-100 text-gray-600 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm group-hover:bg-gray-800 group-hover:text-white transition-colors">🗺️</div>
                     <h3 class="font-bold text-gray-800 text-lg">Editor Mapa</h3>
                     <p class="text-sm text-gray-500 mt-2">Dibujar cortes, zonas y avisos públicos.</p>
                 </div>
@@ -145,200 +131,9 @@
         </div>
     </main>
 
-    <div id="modal-fichaje" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-[100] backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden transform transition-all scale-100">
-            <div class="bg-pc-blue px-6 py-4">
-                <h3 class="text-white font-bold text-lg text-center">⏱️ Entrar de Guardia</h3>
-            </div>
-            <div class="p-6">
-                <p class="text-gray-600 text-sm mb-3 font-medium text-center">Selecciona el tipo de actividad:</p>
-                
-                <select id="select-actividad-fichaje" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-pc-orange outline-none text-gray-800 font-bold text-center mb-6">
-                    <option value="Guardia">🚑 Guardia / Retén</option>
-                    <option value="Preventivo">🎉 Preventivo / Evento</option>
-                    <option value="Formación">🎓 Formación / Curso</option>
-                    <option value="Taller">🔧 Taller / Vehículos</option>
-                    <option value="Gestión">📂 Gestión / Oficina</option>
-                </select>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="cerrarModalFichaje()" class="px-4 py-2 text-gray-500 hover:bg-gray-100 rounded-lg font-bold transition">Cancelar</button>
-                    <button onclick="confirmarEntrada()" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold shadow-md transition transform active:scale-95">CONFIRMAR</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../assets/js/config.js"></script>
+    <script src="../assets/js/dashboard.js"></script>
 
-    <script>
-        let sesionFichajeId = null;
-        let fechaEntrada = null;
-        const miNombre = localStorage.getItem('pc_usuario');
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const rol = localStorage.getItem('pc_rol');
-            const nombre = localStorage.getItem('pc_usuario');
-
-            if(nombre) {
-                const primerNombre = nombre.split(' ')[0]; 
-                document.getElementById('user-name-display').innerText = primerNombre;
-            } else {
-                window.location.href = 'login.html';
-            }
-
-            const rolTexto = (rol === 'admin' || rol === 'jefe') ? 'Coordinador Jefe' : 'Voluntario';
-            document.getElementById('user-role-display').innerText = rolTexto;
-
-            if (rol === 'jefe' || rol === 'admin') {
-                document.getElementById('btn-gestion').classList.remove('hidden');
-                document.getElementById('btn-mapa-admin').classList.remove('hidden');
-            }
-
-            cargarTablon();
-            comprobarEstadoFichaje();
-        });
-
-        function cerrarSesion() {
-            localStorage.clear();
-            window.location.href = 'login.html';
-        }
-
-        async function cargarTablon() {
-            const { data, error } = await sb.from('anuncios').select('*').eq('id', 1).single();
-            const barra = document.getElementById('top-alert-bar');
-            const mensaje = document.getElementById('tablon-mensaje');
-
-            if (data && data.mensaje) {
-                mensaje.innerText = data.mensaje;
-                barra.classList.remove('hidden'); 
-                barra.classList.remove('bg-pc-blue', 'bg-red-600', 'bg-yellow-500', 'text-gray-900', 'animate-pulse');
-                barra.classList.add('text-white');
-
-                if (data.tipo === 'urgente') {
-                    barra.classList.add('bg-red-600', 'animate-pulse');
-                } else if (data.tipo === 'aviso') {
-                    barra.classList.add('bg-yellow-500'); 
-                } else {
-                    barra.classList.add('bg-pc-blue'); 
-                }
-            } else {
-                barra.classList.add('hidden');
-            }
-        }
-
-        // --- LÓGICA DE FICHAJE ---
-
-        async function comprobarEstadoFichaje() {
-            const { data } = await sb
-                .from('registro_horas')
-                .select('*')
-                .eq('usuario', miNombre)
-                .is('salida', null)
-                .single();
-
-            if (data) {
-                sesionFichajeId = data.id;
-                fechaEntrada = new Date(data.entrada);
-                actualizarBotonFichaje(true, data.actividad);
-            } else {
-                sesionFichajeId = null;
-                actualizarBotonFichaje(false);
-            }
-        }
-
-        function actualizarBotonFichaje(estoyDentro, actividad = "") {
-            const btn = document.getElementById('btn-fichar-header');
-            const icon = document.getElementById('icono-fichar');
-            const txtEstado = document.getElementById('texto-estado');
-            const txtAccion = document.getElementById('texto-accion');
-
-            if (estoyDentro) {
-                btn.className = "w-full md:w-auto flex items-center justify-center gap-3 px-6 py-3 rounded-xl shadow-lg transition-all transform active:scale-95 border-2 border-white/20 backdrop-blur-sm bg-red-600 hover:bg-red-700 text-white animate-pulse";
-                icon.innerText = "⏹";
-                txtEstado.innerText = "EN SERVICIO: " + actividad.toUpperCase();
-                txtAccion.innerText = "TERMINAR";
-            } else {
-                btn.className = "w-full md:w-auto flex items-center justify-center gap-3 px-6 py-3 rounded-xl shadow-lg transition-all transform active:scale-95 border-2 border-white/20 backdrop-blur-sm bg-green-500 hover:bg-green-600 text-white";
-                icon.innerText = "▶";
-                txtEstado.innerText = "FUERA DE TURNO";
-                txtAccion.innerText = "ENTRAR";
-            }
-        }
-
-        // 1. CLIC EN EL BOTÓN PRINCIPAL
-        function gestionarClicFichaje() {
-            const btn = document.getElementById('btn-fichar-header');
-            
-            if (sesionFichajeId) {
-                // SI ESTOY DENTRO -> SALIR DIRECTAMENTE
-                realizarSalida();
-            } else {
-                // SI ESTOY FUERA -> ABRIR MODAL PARA ELEGIR QUÉ HACER
-                document.getElementById('modal-fichaje').classList.remove('hidden');
-            }
-        }
-
-        // 2. CONFIRMAR ENTRADA DESDE EL MODAL
-        async function confirmarEntrada() {
-            const actividad = document.getElementById('select-actividad-fichaje').value;
-            const btnModal = document.querySelector('#modal-fichaje button:last-child');
-            
-            btnModal.disabled = true;
-            btnModal.innerText = "...";
-
-            const { data, error } = await sb
-                .from('registro_horas')
-                .insert([{ usuario: miNombre, actividad: actividad }])
-                .select()
-                .single();
-
-            if (!error) {
-                sesionFichajeId = data.id;
-                fechaEntrada = new Date(data.entrada);
-                actualizarBotonFichaje(true, actividad);
-                cerrarModalFichaje();
-                alert("🕒 Turno iniciado correctamente.");
-            } else {
-                alert("Error: " + error.message);
-            }
-            btnModal.disabled = false;
-            btnModal.innerText = "CONFIRMAR";
-        }
-
-        // 3. REALIZAR SALIDA
-        async function realizarSalida() {
-            if(!confirm("¿Terminar turno y fichar salida?")) return;
-
-            const btn = document.getElementById('btn-fichar-header');
-            btn.disabled = true;
-
-            const fechaSalida = new Date();
-            const { error } = await sb
-                .from('registro_horas')
-                .update({ salida: fechaSalida })
-                .eq('id', sesionFichajeId);
-
-            if (!error) {
-                const diffMs = fechaSalida - fechaEntrada;
-                const horas = Math.floor(diffMs / 3600000);
-                const mins = Math.floor((diffMs % 3600000) / 60000);
-                
-                alert(`✅ Turno cerrado.\n\nTotal: ${horas} horas y ${mins} minutos.`);
-                sesionFichajeId = null;
-                actualizarBotonFichaje(false);
-            } else {
-                alert("Error al salir: " + error.message);
-            }
-            btn.disabled = false;
-        }
-
-        function cerrarModalFichaje() {
-            document.getElementById('modal-fichaje').classList.add('hidden');
-        }
-
-    </script>
 </body>
 </html>

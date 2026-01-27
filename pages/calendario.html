@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Intranet - Calendario</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -30,24 +31,23 @@
             <h1 class="text-3xl font-bold text-gray-800">Tablón de Servicios</h1>
             <p class="text-gray-500 mb-4">Próximos eventos convocados por la agrupación.</p>
             
-            <div class="inline-flex items-center bg-white border border-gray-300 rounded-full px-4 py-2 shadow-sm">
+            <div class="inline-flex items-center bg-white border border-gray-300 rounded-full px-4 py-2 shadow-sm select-none">
                 <input type="checkbox" id="filtro-mios" class="w-5 h-5 text-pc-orange focus:ring-pc-orange border-gray-300 rounded cursor-pointer">
-                <label for="filtro-mios" class="ml-2 text-sm font-bold text-gray-700 cursor-pointer select-none">
+                <label for="filtro-mios" class="ml-2 text-sm font-bold text-gray-700 cursor-pointer">
                     Ver solo mis asignaciones
                 </label>
             </div>
-            </div>
+        </div>
 
         <div id="contenedor-calendario" class="space-y-6">
-            </div>
+            <p class="text-center text-gray-400 mt-10">Cargando eventos...</p>
+        </div>
 
     </main>
 
-    <script src="../assets/js/calendario.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <script src="../assets/js/config.js"></script>
+    <script src="../assets/js/calendario.js"></script>
 
 </body>
 </html>

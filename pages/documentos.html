@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Intranet - Documentación</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -27,15 +28,15 @@
                 <h1 class="text-3xl font-bold text-gray-800">📂 Documentación</h1>
                 <p class="text-gray-500">Biblioteca digital de protocolos y guías.</p>
             </div>
-            <div class="bg-white p-1 rounded-lg shadow-sm border border-gray-200 inline-flex">
-                <button onclick="filtrarDocs('todos')" class="filter-btn px-4 py-2 rounded-md text-sm font-bold bg-pc-blue text-white shadow-sm transition">Todos</button>
-                <button onclick="filtrarDocs('protocolos')" class="filter-btn px-4 py-2 rounded-md text-sm font-bold text-gray-600 hover:bg-gray-100 transition">Protocolos</button>
-                <button onclick="filtrarDocs('guias')" class="filter-btn px-4 py-2 rounded-md text-sm font-bold text-gray-600 hover:bg-gray-100 transition">Guías</button>
-                <button onclick="filtrarDocs('normativa')" class="filter-btn px-4 py-2 rounded-md text-sm font-bold text-gray-600 hover:bg-gray-100 transition">Normativa</button>
+            <div class="bg-white p-1 rounded-lg shadow-sm border border-gray-200 inline-flex overflow-x-auto max-w-full">
+                <button onclick="filtrarDocs('todos')" class="filter-btn px-4 py-2 rounded-md text-sm font-bold bg-pc-blue text-white shadow-sm transition whitespace-nowrap">Todos</button>
+                <button onclick="filtrarDocs('protocolos')" class="filter-btn px-4 py-2 rounded-md text-sm font-bold text-gray-600 hover:bg-gray-100 transition whitespace-nowrap">Protocolos</button>
+                <button onclick="filtrarDocs('guias')" class="filter-btn px-4 py-2 rounded-md text-sm font-bold text-gray-600 hover:bg-gray-100 transition whitespace-nowrap">Guías</button>
+                <button onclick="filtrarDocs('normativa')" class="filter-btn px-4 py-2 rounded-md text-sm font-bold text-gray-600 hover:bg-gray-100 transition whitespace-nowrap">Normativa</button>
             </div>
         </div>
 
-        <div id="panel-upload" class="hidden mb-10 bg-blue-50 border border-blue-100 rounded-xl p-6">
+        <div id="panel-upload" class="hidden mb-10 bg-blue-50 border border-blue-100 rounded-xl p-6 shadow-sm">
             <h3 class="font-bold text-pc-blue text-lg mb-4 flex items-center gap-2">🔗 Nuevo Enlace</h3>
             
             <form id="form-upload" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
@@ -56,7 +57,7 @@
                     <input type="url" id="doc-url" placeholder="https://..." class="w-full px-3 py-2 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-pc-blue" required>
                 </div>
                 <div class="md:col-span-1">
-                    <button type="submit" class="w-full bg-pc-blue hover:bg-blue-800 text-white font-bold py-2 px-4 rounded-lg shadow transition flex justify-center gap-2 items-center">
+                    <button type="submit" class="w-full bg-pc-blue hover:bg-blue-800 text-white font-bold py-2 px-4 rounded-lg shadow transition flex justify-center gap-2 items-center active:scale-95">
                         <span>💾 Guardar</span>
                     </button>
                 </div>
@@ -64,7 +65,8 @@
         </div>
 
         <div id="grid-documentos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            </div>
+            <p class="text-gray-400 col-span-full text-center py-10">Cargando biblioteca...</p>
+        </div>
 
     </main>
 

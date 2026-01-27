@@ -3,139 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Intranet PC Aigües</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <style>
-        body { font-family: sans-serif; padding: 20px; background-color: #f0f0f0; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h1 { color: #d35400; }
-        
-        /* ⚡ NUEVO: Estilos para el formulario de añadir */
-        .formulario-add { background: #eee; padding: 15px; border-radius: 5px; margin-bottom: 20px; display: flex; gap: 10px; }
-        input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; flex-grow: 1; }
-        button.btn-add { background: #27ae60; color: white; border: none; padding: 8px 15px; cursor: pointer; font-weight: bold; border-radius: 4px;}
-        
-        .item { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
-        .btn-restar { background: #e74c3c; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <h1>📦 Inventario Interno</h1>
-
-        <div class="formulario-add">
-            <input type="text" id="nuevoNombre" placeholder="Ej: Walkie Talkie">
-            <input type="number" id="nuevaCantidad" placeholder="Cant." style="max-width: 60px;">
-            <button class="btn-add" onclick="agregarMaterial()">Añadir</button>
-        </div>
-        
-        <div id="lista-materiales">
-            <p>Cargando datos...</p>
-        </div>
-    </div>
-
+    <title>Intranet - Inventario</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // --- 1. CONFIGURACIÓN ---
-        // ¡¡¡¡ PEGA AQUÍ TUS CLAVES OTRA VEZ !!!!
-        const SU_URL = 'https://irmkphwdqavkzbgszkon.supabase.co';
-        const SU_KEY = 'sb_publishable_YE4P7UxXiUbAMdXKBPRKYQ_RkrsgsDE';
-        
-        const clienteSupabase = supabase.createClient(SU_URL, SU_KEY);
-        
-        // Variable global para saber quién es el usuario actual
-        let usuarioActual = null;
-        let perfilActual = null;
-
-        // --- 2. SEGURIDAD Y BIENVENIDA ---
-        async function verificarSesion() {
-            // Verificamos si hay usuario logueado
-            const { data: { session } } = await clienteSupabase.auth.getSession();
-
-            if (!session) {
-                // Si no hay sesión, ¡FUERA!
-                window.location.href = "index.html";
-                return;
-            }
-
-            usuarioActual = session.user;
-
-            // Buscamos sus datos personales en la tabla 'perfiles'
-            const { data: perfil, error } = await clienteSupabase
-                .from('perfiles')
-                .select('*')
-                .eq('id', usuarioActual.id)
-                .single(); // .single() porque solo esperamos uno
-
-            if (perfil) {
-                perfilActual = perfil;
-                // Cambiamos el título H1 para saludar
-                document.querySelector('h1').innerText = `Hola, ${perfil.nombre} 👋`;
-                
-                // Si NO es admin, podríamos ocultar cosas aquí
-                if (perfil.rol !== 'admin') {
-                   // Por ejemplo: document.querySelector('.formulario-add').style.display = 'none';
-                }
-            }
-            
-            // Si pasamos el control de seguridad, cargamos el inventario
-            cargarInventario();
+        tailwind.config = {
+            theme: { extend: { colors: { pc: { orange: '#FF6600', blue: '#003366' } } } }
         }
-
-        // --- 3. LEER DATOS ---
-        async function cargarInventario() {
-            const { data, error } = await clienteSupabase
-                .from('material')
-                .select('*')
-                .order('id', { ascending: false });
-
-            if (error) { console.error(error); return; }
-
-            let html = '';
-            data.forEach(producto => {
-                html += `
-                    <div class="item">
-                        <span>
-                            <strong>${producto.nombre}</strong> 
-                            (Stock: ${producto.cantidad})
-                        </span>
-                        <div style="display: flex; gap: 5px;">
-                            <button class="btn-restar" onclick="cogerMaterial(${producto.id}, ${producto.cantidad})">-1</button>
-                            <button onclick="borrarMaterial(${producto.id})" style="background: #555; color: white; border: none; padding: 5px; border-radius: 4px;">🗑️</button>
-                        </div>
-                    </div>
-                `;
-            });
-            document.getElementById('lista-materiales').innerHTML = html;
-        }
-
-        // --- 4. FUNCIONES DE ACCIÓN (Iguales que antes) ---
-        async function cogerMaterial(id, cant) {
-            if (cant <= 0) return alert("No hay stock");
-            await clienteSupabase.from('material').update({ cantidad: cant - 1 }).eq('id', id);
-            cargarInventario();
-        }
-
-        async function borrarMaterial(id) {
-            if (!confirm("¿Borrar?")) return;
-            await clienteSupabase.from('material').delete().eq('id', id);
-            cargarInventario();
-        }
-
-        async function agregarMaterial() {
-            const nombre = document.getElementById('nuevoNombre').value;
-            const cant = document.getElementById('nuevaCantidad').value;
-            if (!nombre || !cant) return;
-            await clienteSupabase.from('material').insert({ nombre: nombre, cantidad: cant });
-            document.getElementById('nuevoNombre').value = '';
-            document.getElementById('nuevaCantidad').value = '';
-            cargarInventario();
-        }
-
-        // --- ARRANCAR ---
-        // En lugar de cargarInventario(), ahora llamamos primero al segurata
-        verificarSesion();
     </script>
+</head>
+<body class="bg-gray-100 font-sans min-h-screen flex flex-col">
+
+    <nav class="bg-pc-blue text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="font-bold text-lg tracking-wider">PC <span class="text-pc-orange">AIGÜES</span></div>
+            <a href="dashboard.html" class="text-xs bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded transition">⬅ Volver</a>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">📦 Inventario de Material</h1>
+
+        <div class="bg-orange-50 border border-orange-200 rounded-xl p-6 mb-8 shadow-sm">
+            <h2 class="text-xl font-bold text-orange-800 mb-4 flex items-center gap-2">🎒 Mi Mochila (A devolver)</h2>
+            <div id="mis-prestamos" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <p class="text-gray-400 text-sm italic">No tienes material asignado ahora mismo.</p>
+            </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-xl p-6 mb-8 shadow-sm">
+            <h2 class="text-xl font-bold text-pc-blue mb-4 flex items-center gap-2">🏢 Almacén (Disponible)</h2>
+            <div id="grid-almacen" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                </div>
+        </div>
+
+        <div id="panel-jefe" class="hidden bg-gray-200 border border-gray-300 rounded-xl p-4 md:p-6 mb-10">
+            <h2 class="text-lg md:text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                👮‍♂️ Panel de Control (Jefe)
+            </h2>
+            
+            <div class="flex flex-col md:flex-row gap-6">
+                
+                <div class="md:w-1/2">
+                    <h3 class="font-bold text-xs md:text-sm uppercase text-gray-500 mb-2">Dar de alta material</h3>
+                    <form id="form-nuevo-item" class="flex flex-col md:flex-row gap-2">
+                        <input type="text" id="nuevo-nombre" placeholder="Ej: Conos" class="flex-1 px-3 py-2 rounded border text-sm" required>
+                        <div class="flex gap-2">
+                            <input type="number" id="nuevo-stock" placeholder="Cant." class="w-20 px-3 py-2 rounded border text-sm" required>
+                            <button type="submit" class="bg-pc-blue text-white px-4 py-2 rounded font-bold hover:bg-blue-800 flex-1 md:flex-none text-sm">+</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="md:w-1/2 border-t md:border-t-0 md:border-l border-gray-300 pt-4 md:pt-0 pl-0 md:pl-6">
+                    <h3 class="font-bold text-xs md:text-sm uppercase text-red-500 mb-2">🔍 Material en la calle (Sin devolver)</h3>
+                    <ul id="lista-morosos" class="text-xs md:text-sm space-y-2 max-h-40 overflow-y-auto bg-gray-100 p-2 rounded-lg border border-gray-300">
+                        </ul>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/config.js"></script>
+    <script src="../assets/js/inventario.js"></script>
 </body>
 </html>

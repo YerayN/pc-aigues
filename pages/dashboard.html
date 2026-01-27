@@ -76,24 +76,37 @@
                 </div>
             </a>
 
-            <a href="#" class="group bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden opacity-75 grayscale hover:grayscale-0 hover:opacity-100">
+            <a href="documentos.html" class="group bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden">
                 <div class="absolute top-0 right-0 bg-green-50 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                
                 <div class="relative z-10">
                     <div class="w-14 h-14 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm group-hover:bg-green-600 group-hover:text-white transition-colors">
                         📂
                     </div>
                     <h3 class="font-bold text-gray-800 text-lg">Documentos</h3>
-                    <p class="text-sm text-gray-500 mt-2">Protocolos, guías y normativas. (Pronto)</p>
+                    <p class="text-sm text-gray-500 mt-2">Protocolos, guías y normativa.</p>
                 </div>
             </a>
 
-            <a href="admin_mapa.html" id="btn-mapa-admin" class="hidden group bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden border-2 border-dashed border-gray-300">
+            <a href="admin_mapa.html" id="btn-mapa-admin" class="hidden group bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden">
+                <div class="absolute top-0 right-0 bg-green-50 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
                 <div class="relative z-10">
                     <div class="w-14 h-14 bg-gray-100 text-gray-600 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm group-hover:bg-gray-800 group-hover:text-white transition-colors">
                         🗺️
                     </div>
                     <h3 class="font-bold text-gray-800 text-lg">Editor Mapa</h3>
                     <p class="text-sm text-gray-500 mt-2">Dibujar cortes, zonas y avisos públicos.</p>
+                </div>
+            </a>
+
+            <a href="inventario.html" class="group bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden">
+                <div class="absolute top-0 right-0 bg-yellow-50 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                <div class="relative z-10">
+                    <div class="w-14 h-14 bg-yellow-100 text-yellow-600 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm group-hover:bg-yellow-500 group-hover:text-white transition-colors">
+                        📦
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-lg">Inventario</h3>
+                    <p class="text-sm text-gray-500 mt-2">Coger y devolver material.</p>
                 </div>
             </a>
 
@@ -132,7 +145,7 @@
 
             if (rol === 'jefe' || rol === 'admin') {
                 document.getElementById('btn-gestion').classList.remove('hidden');
-                document.getElementById('btn-mapa-admin').classList.remove('hidden'); // <--- AÑADE ESTO
+                document.getElementById('btn-mapa-admin').classList.remove('hidden');
             }
 
             // --- B. CARGAR BARRA SUPERIOR ---

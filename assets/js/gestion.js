@@ -1,42 +1,67 @@
 let servicios = [];
-let listaUsuarios = []; // AQUÍ GUARDAREMOS LA LISTA DE COMPAÑEROS
+let listaUsuarios = []; 
 
 document.addEventListener('DOMContentLoaded', () => {
     cargarDatosIniciales();
+    cargarDatosMegafonia(); // Carga los textos actuales de las alertas al entrar
 });
 
-// 1. CARGAMOS USUARIOS Y LUEGO SERVICIOS
+// ==========================================
+// 1. CARGA DE DATOS INICIALES
+// ==========================================
+
 async function cargarDatosIniciales() {
-    // Pedimos la lista de voluntarios a la tabla 'perfiles'
+    // A. Pedimos la lista de voluntarios para el buscador
     const { data: users, error } = await sb
         .from('perfiles')
         .select('nombre, rol')
-        .order('nombre', { ascending: true }); // Ordenados alfabéticamente
+        .order('nombre', { ascending: true });
 
     if (users) {
         listaUsuarios = users;
     }
 
-    // Una vez tenemos los usuarios, cargamos los servicios
+    // B. Cargamos los servicios
     cargarServiciosDeNube();
 }
+
+// Carga el estado actual de los paneles de Megafonía y Alerta
+async function cargarDatosMegafonia() {
+    // 1. Megafonía Interna (Voluntarios)
+    const { data: anuncio } = await sb.from('anuncios').select('*').eq('id', 1).single();
+    if(anuncio) {
+        document.getElementById('anuncio-mensaje').value = anuncio.mensaje;
+        document.getElementById('anuncio-tipo').value = anuncio.tipo;
+    }
+
+    // 2. Alerta Pública (Población)
+    const { data: alerta } = await sb.from('alerta_publica').select('*').eq('id', 1).single();
+    if(alerta) {
+        document.getElementById('publica-mensaje').value = alerta.mensaje;
+        document.getElementById('publica-color').value = alerta.color;
+        // Nota: Ya no cargamos 'activa' porque decidimos que siempre sea true
+    }
+}
+
+// ==========================================
+// 2. GESTIÓN DE SERVICIOS (Descarga y Orden)
+// ==========================================
 
 async function cargarServiciosDeNube() {
     const contenedor = document.getElementById('contenedor-servicios');
     contenedor.innerHTML = '<p class="text-center text-gray-400 mt-10">Conectando con base de datos...</p>';
 
-    // 1. Descargamos todo sin ordenar en la base de datos
+    // Descargamos todo sin ordenar desde la BB.DD.
     const { data: datosSinOrden, error } = await sb
         .from('servicios')
         .select('*');
 
     if (error) {
-        alert("Error de conexión");
+        alert("Error de conexión al cargar servicios");
         return;
     }
 
-    // 2. ORDENACIÓN INTELIGENTE EN JAVASCRIPT (Fecha + Hora)
-    // Esto arregla que la Cabalgata (10:00) salga antes que la Procesión (11:00)
+    // ORDENACIÓN INTELIGENTE EN JS (Fecha + Hora)
     servicios = datosSinOrden.sort((a, b) => {
         const tiempoA = new Date(`${a.fecha}T${a.hora}`);
         const tiempoB = new Date(`${b.fecha}T${b.hora}`);
@@ -54,36 +79,43 @@ function renderizarServicios() {
     contenedorHistorial.innerHTML = '';
 
     const hoy = new Date();
-    hoy.setHours(0,0,0,0);
+    hoy.setHours(0,0,0,0); // Ignoramos la hora actual para comparar solo fechas
 
     const eventosFuturos = [];
     const eventosPasados = [];
 
+    // Separamos futuros y pasados
     servicios.forEach(evento => {
         const fechaEvento = new Date(evento.fecha);
         (fechaEvento >= hoy) ? eventosFuturos.push(evento) : eventosPasados.push(evento);
     });
 
-    // Ordenamos el historial al revés (los recientes arriba)
+    // Ordenamos el historial al revés (los más recientes arriba)
     eventosPasados.sort((a, b) => {
         const tiempoA = new Date(`${a.fecha}T${a.hora}`);
         const tiempoB = new Date(`${b.fecha}T${b.hora}`);
         return tiempoB - tiempoA; 
     });
 
+    // Pintamos las tarjetas
     eventosFuturos.forEach(ev => contenedorFuturo.innerHTML += crearTarjetaHTML(ev, false));
     eventosPasados.forEach(ev => contenedorHistorial.innerHTML += crearTarjetaHTML(ev, true));
 
+    // Mensajes de vacío
     if(eventosFuturos.length === 0) contenedorFuturo.innerHTML = '<p class="text-gray-400 italic text-center">No hay servicios próximos.</p>';
     if(eventosPasados.length === 0) contenedorHistorial.innerHTML = '<p class="text-gray-400 italic text-center">No hay historial disponible.</p>';
 }
+
+// ==========================================
+// 3. GENERADOR DE TARJETAS HTML (Visual)
+// ==========================================
 
 function crearTarjetaHTML(evento, esHistorial) {
     let htmlEquipo = '';
     const listaEquipo = evento.equipo || []; 
     const listaCandidatos = evento.candidatos || []; 
 
-    // 1. PINTAR EQUIPO CONFIRMADO
+    // A. PINTAR EQUIPO CONFIRMADO
     listaEquipo.forEach((voluntario, iVol) => {
         htmlEquipo += `
             <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100 mb-2 shadow-sm">
@@ -96,12 +128,12 @@ function crearTarjetaHTML(evento, esHistorial) {
                         <p class="text-xs text-gray-500 bg-white px-2 py-0.5 rounded border border-gray-200 inline-block mt-1">${voluntario.puesto}</p>
                     </div>
                 </div>
-                ${!esHistorial ? `<button onclick="borrarVoluntario(${evento.id}, ${iVol})" class="text-red-300 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition">❌</button>` : ''}
+                ${!esHistorial ? `<button onclick="borrarVoluntario(${evento.id}, ${iVol})" class="text-red-300 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition">🗑️</button>` : ''}
             </div>
         `;
     });
 
-    // 2. PINTAR SOLICITUDES PENDIENTES
+    // B. PINTAR SOLICITUDES PENDIENTES (Candidatos)
     let htmlCandidatos = '';
     if (!esHistorial && listaCandidatos.length > 0) {
         htmlCandidatos += `<div class="mb-4 bg-yellow-50 border border-yellow-200 rounded-xl p-3">
@@ -112,8 +144,8 @@ function crearTarjetaHTML(evento, esHistorial) {
                 <div class="flex justify-between items-center bg-white p-2 rounded border border-yellow-100 mb-1">
                     <span class="text-sm font-bold text-gray-700">${candidato.nombre}</span>
                     <div class="flex gap-1">
-                        <button onclick="aceptarCandidato(${evento.id}, ${iCand})" class="bg-green-500 hover:bg-green-600 text-white text-xs px-2 py-1 rounded shadow" title="Aceptar">✔️</button>
-                        <button onclick="rechazarCandidato(${evento.id}, ${iCand})" class="bg-red-400 hover:bg-red-500 text-white text-xs px-2 py-1 rounded shadow" title="Rechazar">✖️</button>
+                        <button onclick="aceptarCandidato(${evento.id}, ${iCand})" class="bg-green-500 hover:bg-green-600 text-white text-xs px-2 py-1 rounded shadow" title="Aceptar">✅</button>
+                        <button onclick="rechazarCandidato(${evento.id}, ${iCand})" class="bg-red-400 hover:bg-red-500 text-white text-xs px-2 py-1 rounded shadow" title="Rechazar">❌</button>
                     </div>
                 </div>
             `;
@@ -121,7 +153,7 @@ function crearTarjetaHTML(evento, esHistorial) {
         htmlCandidatos += `</div>`;
     }
 
-    // 3. FORMULARIO DE ASIGNACIÓN DIRECTA
+    // C. FORMULARIO DE ASIGNACIÓN DIRECTA
     let opcionesHTML = '';
     listaUsuarios.forEach(usuario => { opcionesHTML += `<option value="${usuario.nombre}">${usuario.rol}</option>`; });
     const dataListID = `lista-voluntarios-${evento.id}`;
@@ -178,8 +210,11 @@ function crearTarjetaHTML(evento, esHistorial) {
     `;
 }
 
-// --- LOGICA DE BASE DE DATOS ---
+// ==========================================
+// 4. LÓGICA DE BASE DE DATOS (CRUD)
+// ==========================================
 
+// CREAR EVENTO
 document.getElementById('form-servicio').addEventListener('submit', async function(e) {
     e.preventDefault();
     const nuevoEvento = {
@@ -193,14 +228,15 @@ document.getElementById('form-servicio').addEventListener('submit', async functi
     if (!error) { cerrarModal(); this.reset(); cargarServiciosDeNube(); }
 });
 
+// AÑADIR VOLUNTARIO (MANUAL)
 async function anadirVoluntario(e, idEvento) {
     e.preventDefault();
-    const inputNombre = e.target.nombre; // Ahora coge el valor del SELECT
+    const inputNombre = e.target.nombre; 
     const inputPuesto = e.target.puesto;
     
     const eventoActual = servicios.find(s => s.id === idEvento);
 
-    // Evitamos duplicados: Si ya está en la lista, avisamos
+    // Evitamos duplicados
     const yaExiste = eventoActual.equipo.some(v => v.nombre === inputNombre.value);
     if(yaExiste) {
         alert("¡Este voluntario ya está asignado a este servicio!");
@@ -212,6 +248,7 @@ async function anadirVoluntario(e, idEvento) {
     if (!error) { cargarServiciosDeNube(); }
 }
 
+// BORRAR VOLUNTARIO
 async function borrarVoluntario(idEvento, indexVoluntario) {
     const eventoActual = servicios.find(s => s.id === idEvento);
     const nuevoEquipo = [...eventoActual.equipo];
@@ -220,6 +257,7 @@ async function borrarVoluntario(idEvento, indexVoluntario) {
     if (!error) { cargarServiciosDeNube(); }
 }
 
+// BORRAR EVENTO COMPLETO
 async function borrarEvento(id) {
     if(confirm("¿Borrar este servicio?")) {
         const { error } = await sb.from('servicios').delete().eq('id', id);
@@ -227,39 +265,9 @@ async function borrarEvento(id) {
     }
 }
 
-// --- FUNCIÓN PARA PUBLICAR ANUNCIOS (VERSIÓN RECICLAJE) ---
-async function publicarAnuncio(e) {
-    e.preventDefault();
-    
-    const mensaje = document.getElementById('anuncio-mensaje').value;
-    const tipo = document.getElementById('anuncio-tipo').value;
-    const btn = e.target.querySelector('button');
-
-    btn.innerText = "Actualizando...";
-    btn.disabled = true;
-
-    // AHORA HACEMOS UPDATE (ACTUALIZAR) SIEMPRE AL ID 1
-    const { error } = await sb
-        .from('anuncios')
-        .update({ 
-            mensaje: mensaje, 
-            tipo: tipo,
-            created_at: new Date() // Actualizamos la fecha para saber cuándo se cambió
-        })
-        .eq('id', 1); // <--- AQUÍ ESTÁ LA CLAVE: Siempre apuntamos al 1
-
-    if (!error) {
-        alert("📢 Tablón actualizado correctamente.");
-        document.getElementById('anuncio-mensaje').value = "";
-    } else {
-        alert("Error al actualizar: " + error.message);
-    }
-
-    btn.innerText = "Publicar";
-    btn.disabled = false;
-}
-
-// --- FUNCIONES PARA GESTIONAR CANDIDATOS ---
+// ==========================================
+// 5. GESTIÓN DE CANDIDATOS (SOLICITUDES)
+// ==========================================
 
 async function aceptarCandidato(idEvento, indexCandidato) {
     const evento = servicios.find(s => s.id === idEvento);
@@ -268,7 +276,7 @@ async function aceptarCandidato(idEvento, indexCandidato) {
     // 1. Lo añadimos al equipo oficial
     const nuevoEquipo = [...evento.equipo, { 
         nombre: candidato.nombre, 
-        puesto: "General" // Puesto por defecto
+        puesto: "General" 
     }];
 
     // 2. Lo borramos de la lista de candidatos
@@ -302,5 +310,54 @@ async function rechazarCandidato(idEvento, indexCandidato) {
     if (!error) cargarServiciosDeNube();
 }
 
+// ==========================================
+// 6. ZONA DE ALERTAS (Megafonía y Pública)
+// ==========================================
+
+// A. PUBLICAR ANUNCIO INTERNO (VOLUNTARIOS)
+async function publicarAnuncio(e) {
+    e.preventDefault();
+    const mensaje = document.getElementById('anuncio-mensaje').value;
+    const tipo = document.getElementById('anuncio-tipo').value;
+    const btn = e.target.querySelector('button');
+
+    btn.innerText = "Actualizando..."; btn.disabled = true;
+
+    const { error } = await sb.from('anuncios').update({ 
+        mensaje: mensaje, tipo: tipo, created_at: new Date() 
+    }).eq('id', 1);
+
+    if (!error) alert("📢 Tablón interno actualizado.");
+    else alert("Error: " + error.message);
+
+    btn.innerText = "Publicar"; btn.disabled = false;
+}
+
+// B. PUBLICAR ALERTA PÚBLICA (VECINOS)
+async function publicarAlertaPublica(e) {
+    e.preventDefault();
+    
+    const mensaje = document.getElementById('publica-mensaje').value;
+    const color = document.getElementById('publica-color').value;
+    const btn = e.target.querySelector('button');
+
+    btn.innerText = "Enviando..."; btn.disabled = true;
+
+    const { error } = await sb.from('alerta_publica').update({ 
+        mensaje: mensaje, 
+        color: color, 
+        activa: true, // SIEMPRE VISIBLE
+        created_at: new Date() 
+    }).eq('id', 1);
+
+    if (!error) alert("🚨 Web pública actualizada correctamente.");
+    else alert("Error: " + error.message);
+
+    btn.innerText = "Actualizar Web"; btn.disabled = false;
+}
+
+// ==========================================
+// 7. FUNCIONES AUXILIARES (MODAL)
+// ==========================================
 function abrirModalServicio() { document.getElementById('modal-servicio').classList.remove('hidden'); }
 function cerrarModal() { document.getElementById('modal-servicio').classList.add('hidden'); }

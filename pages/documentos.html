@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intranet - Documentación</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { pc: { orange: '#FF6600', blue: '#003366' } } } }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 font-sans min-h-screen flex flex-col">
+
+    <nav class="bg-pc-blue text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="font-bold text-lg tracking-wider">PC <span class="text-pc-orange">AIGÜES</span></div>
+            <a href="dashboard.html" class="text-xs bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded transition">⬅ Volver</a>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 max-w-5xl">
+        
+        <div class="flex flex-col md:flex-row justify-between items-end gap-4 mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">📂 Documentación</h1>
+                <p class="text-gray-500">Biblioteca digital de protocolos y guías.</p>
+            </div>
+            <div class="bg-white p-1 rounded-lg shadow-sm border border-gray-200 inline-flex">
+                <button onclick="filtrarDocs('todos')" class="filter-btn px-4 py-2 rounded-md text-sm font-bold bg-pc-blue text-white shadow-sm transition">Todos</button>
+                <button onclick="filtrarDocs('protocolos')" class="filter-btn px-4 py-2 rounded-md text-sm font-bold text-gray-600 hover:bg-gray-100 transition">Protocolos</button>
+                <button onclick="filtrarDocs('guias')" class="filter-btn px-4 py-2 rounded-md text-sm font-bold text-gray-600 hover:bg-gray-100 transition">Guías</button>
+                <button onclick="filtrarDocs('normativa')" class="filter-btn px-4 py-2 rounded-md text-sm font-bold text-gray-600 hover:bg-gray-100 transition">Normativa</button>
+            </div>
+        </div>
+
+        <div id="panel-upload" class="hidden mb-10 bg-blue-50 border border-blue-100 rounded-xl p-6">
+            <h3 class="font-bold text-pc-blue text-lg mb-4 flex items-center gap-2">🔗 Nuevo Enlace</h3>
+            
+            <form id="form-upload" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div class="md:col-span-1">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Título</label>
+                    <input type="text" id="doc-titulo" placeholder="Ej: Plan 2026" class="w-full px-3 py-2 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-pc-blue" required>
+                </div>
+                <div class="md:col-span-1">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Categoría</label>
+                    <select id="doc-categoria" class="w-full px-3 py-2 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-pc-blue">
+                        <option value="protocolos">Protocolo</option>
+                        <option value="guias">Guía / Manual</option>
+                        <option value="normativa">Normativa</option>
+                    </select>
+                </div>
+                <div class="md:col-span-1">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Enlace (Drive/Dropbox)</label>
+                    <input type="url" id="doc-url" placeholder="https://..." class="w-full px-3 py-2 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-pc-blue" required>
+                </div>
+                <div class="md:col-span-1">
+                    <button type="submit" class="w-full bg-pc-blue hover:bg-blue-800 text-white font-bold py-2 px-4 rounded-lg shadow transition flex justify-center gap-2 items-center">
+                        <span>💾 Guardar</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="grid-documentos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/config.js"></script>
+    <script src="../assets/js/documentos.js"></script>
+</body>
+</html>

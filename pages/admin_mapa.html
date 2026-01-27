@@ -2,100 +2,121 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Editor de Mapa Público</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script>
         tailwind.config = { theme: { extend: { colors: { pc: { orange: '#FF6600', blue: '#003366' } } } } }
     </script>
+    <style>
+        /* Evitar el rebote en móvil */
+        body { overscroll-behavior: none; }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans h-screen flex flex-col">
+<body class="bg-gray-100 font-sans h-screen flex flex-col overflow-hidden">
 
-    <nav class="bg-gray-900 text-white p-4 flex justify-between items-center shadow-lg z-50">
-        <div class="font-bold text-lg flex items-center gap-2">
-            <span>🗺️ Editor de Mapa Público</span>
+    <script>
+        (function() {
+            const rol = localStorage.getItem('pc_rol');
+            // Si no hay rol o no es ni admin ni jefe...
+            if (!rol || (rol !== 'admin' && rol !== 'jefe')) {
+                alert("⛔ Acceso Denegado: Zona restringida a Coordinación.");
+                window.location.href = 'dashboard.html'; // ¡FUERA!
+            }
+        })();
+    </script>
+
+    <nav class="bg-gray-900 text-white p-3 md:p-4 flex justify-between items-center shadow-lg z-50 shrink-0">
+        <div class="font-bold text-base md:text-lg flex items-center gap-2">
+            <span>🗺️ Editor Mapa</span>
         </div>
-        <a href="dashboard.html" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm transition">Volver al Panel</a>
+        <a href="dashboard.html" class="bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded text-xs md:text-sm transition">Volver</a>
     </nav>
 
-    <div class="flex flex-1 overflow-hidden">
+    <div class="flex flex-col md:flex-row flex-1 overflow-hidden relative">
         
-        <div class="w-2/3 relative h-full">
-            <div id="map" class="w-full h-full z-0"></div>
+        <div class="w-full md:w-2/3 h-[45%] md:h-full relative z-0 order-1">
+            <div id="map" class="w-full h-full"></div>
             
-            <div id="instrucciones-mapa" class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-lg text-sm font-bold text-gray-700 z-[400] border border-gray-200 hidden">
-                👆 Haz clic en el mapa para empezar a dibujar
+            <div id="instrucciones-mapa" class="absolute top-2 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur px-3 py-1.5 rounded-full shadow-lg text-xs md:text-sm font-bold text-gray-700 z-[400] border border-gray-200 hidden whitespace-nowrap">
+                👆 Clica en el mapa
             </div>
         </div>
 
-        <div class="w-1/3 bg-white border-l border-gray-200 p-6 overflow-y-auto shadow-xl z-10">
+        <div class="w-full md:w-1/3 h-full md:h-full bg-white border-t-4 md:border-t-0 md:border-l border-pc-orange md:border-gray-200 p-4 md:p-6 overflow-y-auto shadow-[0_-5px_15px_rgba(0,0,0,0.1)] z-10 order-2 flex-1">
             
-            <h2 class="text-xl font-bold text-pc-blue mb-6 border-b pb-2">Nuevo Elemento</h2>
+            <h2 class="text-lg md:text-xl font-bold text-pc-blue mb-4 border-b pb-2 hidden md:block">Nuevo Elemento</h2>
 
-            <form id="form-mapa" class="space-y-4">
+            <form id="form-mapa" class="space-y-3 md:space-y-4 pb-20 md:pb-0">
                 
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Tipo de Incidencia</label>
+                    <label class="block text-[10px] md:text-xs font-bold text-gray-500 uppercase mb-1">Tipo de Incidencia</label>
                     <div class="grid grid-cols-3 gap-2">
-                        <button type="button" onclick="setModo('punto')" id="btn-punto" class="modo-btn bg-blue-100 text-blue-700 border border-blue-200 py-2 rounded-lg font-bold text-sm hover:bg-blue-200 active:ring-2 ring-blue-500 transition">📍 Punto</button>
-                        <button type="button" onclick="setModo('linea')" id="btn-linea" class="modo-btn bg-gray-50 text-gray-600 border border-gray-200 py-2 rounded-lg font-bold text-sm hover:bg-gray-100 transition">➖ Corte</button>
-                        <button type="button" onclick="setModo('zona')" id="btn-zona" class="modo-btn bg-gray-50 text-gray-600 border border-gray-200 py-2 rounded-lg font-bold text-sm hover:bg-gray-100 transition">⬠ Zona</button>
+                        <button type="button" onclick="setModo('punto')" id="btn-punto" class="modo-btn bg-blue-100 text-blue-700 border border-blue-200 py-2 rounded-lg font-bold text-xs md:text-sm hover:bg-blue-200 active:ring-2 ring-blue-500 transition flex flex-col items-center justify-center gap-1">
+                            <span class="text-lg">📍</span> Punto
+                        </button>
+                        <button type="button" onclick="setModo('linea')" id="btn-linea" class="modo-btn bg-gray-50 text-gray-600 border border-gray-200 py-2 rounded-lg font-bold text-xs md:text-sm hover:bg-gray-100 transition flex flex-col items-center justify-center gap-1">
+                            <span class="text-lg">➖</span> Corte
+                        </button>
+                        <button type="button" onclick="setModo('zona')" id="btn-zona" class="modo-btn bg-gray-50 text-gray-600 border border-gray-200 py-2 rounded-lg font-bold text-xs md:text-sm hover:bg-gray-100 transition flex flex-col items-center justify-center gap-1">
+                            <span class="text-lg">⬠</span> Zona
+                        </button>
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Título</label>
-                    <input type="text" id="titulo" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pc-orange outline-none" placeholder="Ej: Corte Calle Mayor" required>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Descripción</label>
-                    <textarea id="descripcion" rows="2" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pc-orange outline-none" placeholder="Motivo, horario..."></textarea>
-                </div>
-
-                <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
-                    <p class="text-xs font-bold text-blue-800 uppercase mb-2">📅 Programación (Opcional)</p>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase">Inicio</label>
-                            <input type="datetime-local" id="fecha-inicio" class="w-full px-2 py-1 border rounded text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase">Fin</label>
-                            <input type="datetime-local" id="fecha-fin" class="w-full px-2 py-1 border rounded text-sm">
-                        </div>
-                    </div>
-                    <p class="text-[10px] text-gray-400 mt-1 italic">* Si lo dejas vacío, será visible siempre.</p>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 gap-3">
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Color</label>
-                        <select id="color" class="w-full px-3 py-2 border rounded-lg bg-white">
-                            <option value="azul">Azul (Info)</option>
-                            <option value="rojo">Rojo (Peligro)</option>
-                            <option value="naranja">Naranja (Obras)</option>
-                            <option value="verde">Verde (Seguro)</option>
-                        </select>
+                        <label class="block text-[10px] md:text-xs font-bold text-gray-500 uppercase mb-1">Título</label>
+                        <input type="text" id="titulo" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pc-orange outline-none text-sm" placeholder="Ej: Corte Calle Mayor" required>
                     </div>
-                    <input type="hidden" id="input-lat"><input type="hidden" id="input-lng"><input type="hidden" id="input-coords">
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                         <div>
+                            <label class="block text-[10px] md:text-xs font-bold text-gray-500 uppercase mb-1">Color</label>
+                            <select id="color" class="w-full px-2 py-2 border rounded-lg bg-white text-sm">
+                                <option value="azul">🔵 Azul (Info)</option>
+                                <option value="rojo">🔴 Rojo (Peligro)</option>
+                                <option value="naranja">🟠 Naranja (Obras)</option>
+                                <option value="verde">🟢 Verde (Seguro)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] md:text-xs font-bold text-gray-500 uppercase mb-1">Descripción</label>
+                            <input type="text" id="descripcion" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pc-orange outline-none text-sm" placeholder="Detalles...">
+                        </div>
+                    </div>
                 </div>
 
-                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200 text-xs">
-                    <p class="font-bold text-gray-500 mb-1">ESTADO DEL DIBUJO:</p>
-                    <p id="status-coords" class="text-gray-400 italic">Selecciona un tipo y haz clic en el mapa.</p>
-                    <button type="button" onclick="borrarDibujo()" class="mt-2 text-red-500 hover:text-red-700 font-bold underline hidden" id="btn-reset">Borrar trazado</button>
+                <div class="bg-blue-50 p-2 md:p-3 rounded-lg border border-blue-100">
+                    <p class="text-[10px] font-bold text-blue-800 uppercase mb-1">📅 Programación (Opcional)</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[9px] font-bold text-gray-400 uppercase">Inicio</label>
+                            <input type="datetime-local" id="fecha-inicio" class="w-full px-2 py-1 border rounded text-xs bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-bold text-gray-400 uppercase">Fin</label>
+                            <input type="datetime-local" id="fecha-fin" class="w-full px-2 py-1 border rounded text-xs bg-white">
+                        </div>
+                    </div>
                 </div>
 
-                <button type="submit" class="w-full bg-pc-orange hover:bg-orange-600 text-white font-bold py-4 rounded-xl shadow-lg transition transform active:scale-95">
+                <input type="hidden" id="input-lat"><input type="hidden" id="input-lng"><input type="hidden" id="input-coords">
+
+                <div class="bg-gray-50 p-2 rounded-lg border border-gray-200 text-xs flex justify-between items-center">
+                    <span id="status-coords" class="text-gray-500 italic truncate">Selecciona tipo y dibuja arriba 👆</span>
+                    <button type="button" onclick="borrarDibujo()" class="text-red-500 font-bold hidden px-2 py-1 border border-red-200 rounded bg-white" id="btn-reset">Borrar</button>
+                </div>
+
+                <button type="submit" class="w-full bg-pc-orange hover:bg-orange-600 text-white font-bold py-3 rounded-xl shadow-lg transition transform active:scale-95 text-sm md:text-base">
                     GUARDAR CAMBIOS
                 </button>
             </form>
 
-            <div class="mt-10 border-t pt-6">
-                <h3 class="font-bold text-gray-800 mb-4">Elementos Activos</h3>
-                <div id="lista-elementos" class="space-y-2 text-sm"></div>
+            <div class="mt-8 border-t pt-4">
+                <h3 class="font-bold text-gray-800 mb-2 text-sm">Elementos Activos</h3>
+                <div id="lista-elementos" class="space-y-2 text-xs"></div>
             </div>
 
         </div>
@@ -125,7 +146,7 @@
                 L.marker([lat, lng]).addTo(capaDibujo);
                 document.getElementById('input-lat').value = lat;
                 document.getElementById('input-lng').value = lng;
-                statusText.innerText = `Punto fijado.`;
+                statusText.innerText = "Punto marcado ✅";
             } else {
                 puntosDibujados.push([lat, lng]);
                 capaDibujo.clearLayers();
@@ -133,10 +154,10 @@
 
                 if (modoActual === 'linea') {
                     L.polyline(puntosDibujados, { color: 'blue' }).addTo(capaDibujo);
-                    statusText.innerText = `Línea: ${puntosDibujados.length} puntos.`;
+                    statusText.innerText = `Línea (${puntosDibujados.length} pts)`;
                 } else if (modoActual === 'zona') {
                     L.polygon(puntosDibujados, { color: 'orange' }).addTo(capaDibujo);
-                    statusText.innerText = `Zona: ${puntosDibujados.length} vértices.`;
+                    statusText.innerText = `Zona (${puntosDibujados.length} vértices)`;
                 }
                 document.getElementById('input-coords').value = JSON.stringify(puntosDibujados);
                 btnReset.classList.remove('hidden');
@@ -156,9 +177,9 @@
             
             const instrucciones = document.getElementById('instrucciones-mapa');
             instrucciones.classList.remove('hidden');
-            if(modo === 'punto') instrucciones.innerText = "📍 Haz clic para marcar un punto";
-            if(modo === 'linea') instrucciones.innerText = "➖ Haz clic secuencialmente para trazar";
-            if(modo === 'zona') instrucciones.innerText = "⬠ Haz clic en las esquinas";
+            if(modo === 'punto') instrucciones.innerText = "📍 Toca en el mapa";
+            if(modo === 'linea') instrucciones.innerText = "➖ Toca varios puntos";
+            if(modo === 'zona') instrucciones.innerText = "⬠ Cierra el área";
         }
 
         function borrarDibujo() {
@@ -167,11 +188,10 @@
             document.getElementById('input-lat').value = '';
             document.getElementById('input-lng').value = '';
             document.getElementById('input-coords').value = '';
-            statusText.innerText = "Esperando clicks...";
+            statusText.innerText = "Dibuja en el mapa 👆";
             btnReset.classList.add('hidden');
         }
 
-        // GUARDAR CON FECHAS
         document.getElementById('form-mapa').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
@@ -188,7 +208,6 @@
                 descripcion: desc,
                 tipo: modoActual,
                 color: color,
-                // Si el campo está vacío (""), mandamos null. Si tiene valor, lo mandamos.
                 inicio: fechaInicio ? new Date(fechaInicio) : null,
                 fin: fechaFin ? new Date(fechaFin) : null
             };
@@ -196,10 +215,10 @@
             if (modoActual === 'punto') {
                 datosInsert.lat = document.getElementById('input-lat').value;
                 datosInsert.lng = document.getElementById('input-lng').value;
-                if(!datosInsert.lat) { alert("¡Falta el punto!"); btn.disabled=false; return; }
+                if(!datosInsert.lat) { alert("¡Marca un punto!"); btn.disabled=false; btn.innerText="GUARDAR CAMBIOS"; return; }
             } else {
                 const rawCoords = document.getElementById('input-coords').value;
-                if(!rawCoords) { alert("¡Dibuja primero!"); btn.disabled=false; return; }
+                if(!rawCoords) { alert("¡Dibuja algo!"); btn.disabled=false; btn.innerText="GUARDAR CAMBIOS"; return; }
                 datosInsert.coordenadas = JSON.parse(rawCoords);
                 if (modoActual === 'zona') datosInsert.relleno = 'yellow';
             }
@@ -208,7 +227,7 @@
 
             if (error) { alert("Error: " + error.message); } 
             else { 
-                alert("✅ Elemento guardado."); 
+                alert("✅ Guardado."); 
                 borrarDibujo(); 
                 e.target.reset(); 
                 cargarListaElementos(); 
@@ -224,25 +243,24 @@
                 divLista.innerHTML = '';
                 data.forEach(el => {
                     const icono = el.tipo === 'punto' ? '📍' : (el.tipo === 'linea' ? '➖' : '⬠');
-                    let avisoTiempo = '';
+                    let colorStatus = "text-gray-400";
                     if (el.inicio && el.fin) {
-                        const inicio = new Date(el.inicio);
-                        const fin = new Date(el.fin);
                         const ahora = new Date();
-                        if (ahora < inicio) avisoTiempo = '<span class="text-blue-500 text-[10px] ml-2">(Programado)</span>';
-                        else if (ahora > fin) avisoTiempo = '<span class="text-red-500 text-[10px] ml-2">(Caducado)</span>';
-                        else avisoTiempo = '<span class="text-green-500 text-[10px] ml-2">(Activo ahora)</span>';
-                    } else {
-                        avisoTiempo = '<span class="text-gray-400 text-[10px] ml-2">(Siempre visible)</span>';
+                        if (ahora >= new Date(el.inicio) && ahora <= new Date(el.fin)) colorStatus = "text-green-500";
+                        else if (ahora < new Date(el.inicio)) colorStatus = "text-blue-500";
+                        else colorStatus = "text-red-500";
                     }
 
                     divLista.innerHTML += `
                         <div class="flex justify-between items-center bg-gray-50 p-2 rounded border hover:bg-white transition mb-1">
-                            <div>
-                                <span class="font-bold text-gray-700">${icono} ${el.titulo}</span> ${avisoTiempo}
-                                <p class="text-xs text-gray-500 truncate w-40">${el.descripcion}</p>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-1">
+                                    <span class="font-bold text-gray-700 truncate">${icono} ${el.titulo}</span>
+                                    <span class="text-[10px] ${colorStatus}">●</span>
+                                </div>
+                                <p class="text-[10px] text-gray-500 truncate">${el.descripcion || 'Sin descripción'}</p>
                             </div>
-                            <button onclick="eliminarElemento(${el.id})" class="text-red-400 hover:text-red-600 p-1">🗑️</button>
+                            <button onclick="eliminarElemento(${el.id})" class="text-red-400 hover:text-red-600 p-2 ml-2">🗑️</button>
                         </div>
                     `;
                 });

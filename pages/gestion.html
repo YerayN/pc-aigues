@@ -14,7 +14,6 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <script src="../assets/js/config.js"></script>
 </head>
 <body class="bg-gray-100 font-sans min-h-screen flex flex-col">
@@ -32,14 +31,21 @@
 
     <main class="container mx-auto px-4 py-8 max-w-4xl">
         
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
                 <h1 class="text-3xl font-bold text-gray-800">Gestión Operativa</h1>
                 <p class="text-gray-500">Planificación de servicios y asignación de personal.</p>
             </div>
-            <button onclick="abrirModalServicio()" class="bg-pc-orange hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 flex items-center gap-2">
-                <span>+</span> Crear Nuevo Evento
-            </button>
+            
+            <div class="flex flex-wrap gap-2">
+                <a href="admin_partes.html" class="bg-gray-800 hover:bg-black text-white font-bold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 flex items-center gap-2 text-sm md:text-base">
+                    <span>📂</span> Ver Libro Partes
+                </a>
+                
+                <button onclick="abrirModalServicio()" class="bg-pc-orange hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 flex items-center gap-2 text-sm md:text-base">
+                    <span>+</span> Nuevo Evento
+                </button>
+            </div>
         </div>
 
         <div class="mb-4 bg-indigo-50 border border-indigo-100 rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -97,13 +103,10 @@
             </form>
         </div>
 
-
         <div id="contenedor-servicios" class="space-y-6">
             </div>
 
-
-
-            <hr class="my-10 border-gray-200">
+        <hr class="my-10 border-gray-200">
 
         <div class="mb-10">
             <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2 mb-6">

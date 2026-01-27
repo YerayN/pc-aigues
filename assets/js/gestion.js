@@ -1,9 +1,11 @@
 let servicios = [];
 let listaUsuarios = []; 
 
+
 document.addEventListener('DOMContentLoaded', () => {
     cargarDatosIniciales();
-    cargarDatosMegafonia(); // Carga los textos actuales de las alertas al entrar
+    cargarDatosMegafonia();
+    cargarEstadisticas();
 });
 
 // ==========================================
@@ -361,3 +363,111 @@ async function publicarAlertaPublica(e) {
 // ==========================================
 function abrirModalServicio() { document.getElementById('modal-servicio').classList.remove('hidden'); }
 function cerrarModal() { document.getElementById('modal-servicio').classList.add('hidden'); }
+
+// ==========================================
+// 8. ESTADÍSTICAS Y CONTROL HORARIO
+// ==========================================
+
+async function cargarEstadisticas() {
+    // 1. Descargar todos los registros que tengan salida (los terminados)
+    const { data: registros, error } = await sb
+        .from('registro_horas')
+        .select('*')
+        .not('salida', 'is', null)
+        .order('salida', { ascending: false }); // Los más recientes primero
+
+    if (error) return;
+
+    // 2. Procesar datos para el RANKING
+    const ranking = {};
+
+    registros.forEach(reg => {
+        const entrada = new Date(reg.entrada);
+        const salida = new Date(reg.salida);
+        const diffMs = salida - entrada; // Diferencia en milisegundos
+
+        if (!ranking[reg.usuario]) {
+            ranking[reg.usuario] = 0;
+        }
+        ranking[reg.usuario] += diffMs;
+    });
+
+    // Convertir objeto a array y ordenar por horas (descendente)
+    const rankingArray = Object.entries(ranking)
+        .map(([nombre, ms]) => ({ nombre, ms }))
+        .sort((a, b) => b.ms - a.ms);
+
+    renderizarRanking(rankingArray);
+    renderizarUltimosRegistros(registros);
+}
+
+function renderizarRanking(lista) {
+    const tbody = document.getElementById('tabla-ranking');
+    tbody.innerHTML = '';
+
+    if (lista.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2" class="px-6 py-4 text-center text-gray-400">Sin datos aún</td></tr>';
+        return;
+    }
+
+    lista.forEach((vol, index) => {
+        // Formatear tiempo (Ej: 12h 30m)
+        const horas = Math.floor(vol.ms / 3600000);
+        const mins = Math.floor((vol.ms % 3600000) / 60000);
+        
+        // Medallas
+        let medalla = '';
+        let claseFila = 'border-b border-gray-50 hover:bg-gray-50';
+        if (index === 0) { medalla = '🥇'; claseFila = 'bg-yellow-50 border-b border-yellow-100'; }
+        else if (index === 1) { medalla = '🥈'; }
+        else if (index === 2) { medalla = '🥉'; }
+
+        tbody.innerHTML += `
+            <tr class="${claseFila} transition">
+                <td class="px-6 py-3 font-medium text-gray-700 flex items-center gap-2">
+                    <span class="w-6 text-center">${medalla || (index + 1) + '.'}</span>
+                    ${vol.nombre}
+                </td>
+                <td class="px-6 py-3 text-right text-pc-blue font-bold">
+                    ${horas}h ${mins}m
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function renderizarUltimosRegistros(lista) {
+    const tbody = document.getElementById('tabla-registros');
+    tbody.innerHTML = '';
+
+    // Mostramos solo los últimos 50 movimientos
+    lista.slice(0, 50).forEach(reg => {
+        const fecha = new Date(reg.entrada).toLocaleDateString();
+        const duracionMs = new Date(reg.salida) - new Date(reg.entrada);
+        const horas = Math.floor(duracionMs / 3600000);
+        const mins = Math.floor((duracionMs % 3600000) / 60000);
+
+        // Colorcito según actividad
+        let colorDot = 'bg-gray-400';
+        if (reg.actividad === 'Guardia') colorDot = 'bg-green-500';
+        if (reg.actividad === 'Preventivo') colorDot = 'bg-purple-500';
+        if (reg.actividad === 'Taller') colorDot = 'bg-orange-500';
+
+        tbody.innerHTML += `
+            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                <td class="px-6 py-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-2 h-2 rounded-full ${colorDot} shrink-0"></div>
+                        <div>
+                            <p class="font-bold text-gray-700">${reg.usuario}</p>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-wide">${reg.actividad} • ${fecha}</p>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-6 py-3 text-right whitespace-nowrap text-gray-500">
+                    ${horas}h ${mins}m
+                </td>
+            </tr>
+        `;
+    });
+}

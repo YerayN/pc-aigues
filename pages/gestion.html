@@ -97,8 +97,55 @@
             </form>
         </div>
 
+
         <div id="contenedor-servicios" class="space-y-6">
             </div>
+
+
+
+            <hr class="my-10 border-gray-200">
+
+        <div class="mb-10">
+            <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2 mb-6">
+                📊 Control de Horas y Actividad
+            </h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                        <h3 class="font-bold text-gray-700">🏆 Ranking de Voluntarios</h3>
+                        <span class="text-xs bg-blue-100 text-pc-blue px-2 py-1 rounded font-bold">Total Acumulado</span>
+                    </div>
+                    <div class="p-0">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-xs text-gray-400 uppercase border-b border-gray-100">
+                                    <th class="px-6 py-3 font-medium">Voluntario</th>
+                                    <th class="px-6 py-3 font-medium text-right">Horas Totales</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-ranking" class="text-sm">
+                                <tr><td colspan="2" class="px-6 py-4 text-center text-gray-400">Calculando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-96">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-100">
+                        <h3 class="font-bold text-gray-700">🕒 Últimos Registros</h3>
+                    </div>
+                    <div class="overflow-y-auto flex-1 p-0">
+                        <table class="w-full text-left border-collapse">
+                            <tbody id="tabla-registros" class="text-xs">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
 
         <div class="mt-12 mb-6 border-t-2 border-gray-200 pt-8">
             <h2 class="text-2xl font-bold text-gray-400 flex items-center gap-2">

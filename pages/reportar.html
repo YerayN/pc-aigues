@@ -9,12 +9,12 @@
         tailwind.config = { theme: { extend: { colors: { pc: { orange: '#FF6600', blue: '#003366' } } } } }
     </script>
 </head>
-<body class="bg-gray-50 font-sans min-h-screen flex flex-col">
+<body class="bg-gray-100 font-sans min-h-screen flex flex-col">
 
-    <nav class="bg-pc-blue text-white shadow-lg">
+    <nav class="bg-pc-blue text-white shadow-lg relative z-30">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="../index.html" class="flex items-center space-x-3 hover:opacity-90 transition">
-                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-pc-blue font-bold shadow-sm">
+            <a href="../index.html" class="flex items-center space-x-3 hover:opacity-90 transition group">
+                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-pc-blue font-bold shadow-sm group-hover:ring-2 ring-white transition">
                     <img src="../assets/img/escudo.png" alt="PC" class="w-full h-full object-cover rounded-full">
                 </div>
                 <div>
@@ -22,40 +22,48 @@
                     <p class="text-xs text-pc-orange font-bold tracking-wider">AIGÜES</p>
                 </div>
             </a>
-            <a href="../index.html" class="text-sm font-bold uppercase hover:text-pc-orange transition flex items-center">
+            <a href="../index.html" class="text-sm font-bold uppercase text-gray-300 hover:text-white transition flex items-center bg-white/10 px-4 py-2 rounded-full">
                 <span class="mr-2">←</span> Volver
             </a>
         </div>
     </nav>
 
-    <header class="bg-pc-orange text-white py-12 text-center relative overflow-hidden">
-        <div class="absolute inset-0 bg-orange-600 opacity-20 pattern-grid-lg"></div>
+    <header class="bg-pc-orange text-white py-10 text-center relative overflow-hidden z-10 shadow-md">
+        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.4)_0,_transparent_100%)]"></div>
+        
         <div class="relative z-10 container mx-auto px-4">
-            <h2 class="text-3xl md:text-4xl font-bold mb-2">📸 Reporte Ciudadano</h2>
-            <p class="text-orange-100 max-w-xl mx-auto">
-                Tu colaboración es vital. Si ves una farola caída, una rama peligrosa o cualquier incidencia, envíanosla aquí.
+            <h2 class="text-3xl md:text-4xl font-bold mb-3 drop-shadow-sm">📸 Reporte Ciudadano</h2>
+            <p class="text-orange-50 max-w-xl mx-auto text-sm md:text-base font-medium">
+                Tu colaboración es vital. Ayúdanos a mantener Aigües seguro reportando desperfectos.
             </p>
         </div>
     </header>
 
-    <main class="flex-grow container mx-auto px-4 -mt-8 relative z-20 mb-12">
-        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-2xl mx-auto border border-gray-100">
+    <main class="flex-grow container mx-auto px-4 -mt-6 relative z-20 mb-12">
+        
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden max-w-3xl mx-auto border border-gray-200 p-4 md:p-8">
             
             <iframe data-tally-src="https://tally.so/embed/2EP2ke?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1" 
-                    loading="lazy" width="100%" height="400" frameborder="0" marginheight="0" marginwidth="0" 
-                    title="Reportar Incidencia">
+                    loading="lazy" 
+                    width="100%" 
+                    height="300" 
+                    frameborder="0" 
+                    marginheight="0" 
+                    marginwidth="0" 
+                    title="Reportar Incidencia"
+                    class="w-full">
             </iframe>
             
         </div>
         
-        <p class="text-center text-gray-400 text-xs mt-6">
-            Este formulario es para incidencias leves. <br>
-            <span class="font-bold text-red-500">Para emergencias graves llama siempre al 112.</span>
+        <p class="text-center text-gray-500 text-xs mt-4 max-w-md mx-auto bg-gray-200/50 py-2 px-4 rounded-full">
+            ℹ️ Este formulario es para incidencias leves. <br class="md:hidden">
+            <span class="font-bold text-red-600">Para emergencias graves llama siempre al 112.</span>
         </p>
     </main>
 
-    <footer class="bg-gray-800 text-gray-400 py-6 text-center text-sm">
-        <p>&copy; 2026 Protección Civil Aigües.</p>
+    <footer class="bg-gray-900 text-gray-500 py-6 text-center text-sm z-10">
+        <p>&copy; 2026 Protección Civil Aigües. Colaboración ciudadana.</p>
     </footer>
 
     <script async src="https://tally.so/widgets/embed.js"></script>

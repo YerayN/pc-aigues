@@ -76,107 +76,103 @@
     </main>
 
     <script>
-        let watchID = null;
-
         function obtenerUbicacion() {
             const btn = document.getElementById('btnGPS');
             const txt = document.getElementById('txtGPS');
             const iframe = document.getElementById('tallyFrame');
             
-            // Si ya estamos buscando, paramos
+            // Evitar doble click
             if (btn.classList.contains('cursor-wait')) return;
 
-            // 1. ESTADO INICIAL
-            txt.innerText = "Calentando GPS (Espere)...";
+            // Cambiar estado visual
+            txt.innerText = "Buscando satélites...";
             btn.classList.add('bg-blue-100', 'cursor-wait');
-            
+
             if (!navigator.geolocation) {
-                alert("Tu navegador no tiene GPS.");
+                alert("Tu dispositivo no tiene GPS.");
                 resetBtn();
                 return;
             }
 
-            const opciones = {
-                enableHighAccuracy: true, // ¡OBLIGATORIO!
-                timeout: 15000,           // Damos 15 segundos para afinar
-                maximumAge: 0             // Prohibido usar caché vieja
+            // --- INTENTO 1: ALTA PRECISIÓN (GPS REAL) ---
+            const opcionesAlta = {
+                enableHighAccuracy: true,
+                timeout: 5000,   // Le damos solo 5 segundos para intentar pillar satélite
+                maximumAge: 0
             };
 
-            // 2. USAMOS WATCHPOSITION (Mirada contínua)
-            // Esto se ejecuta muchas veces por segundo mientras afina
-            watchID = navigator.geolocation.watchPosition(
+            navigator.geolocation.getCurrentPosition(
+                // ÉXITO ALTA PRECISIÓN
+                (pos) => { procesarUbicacion(pos, "GPS Exacto"); },
                 
-                // A) SI ENCUENTRA SEÑAL
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const long = position.coords.longitude;
-                    const accuracy = position.coords.accuracy; // Error en metros
-
-                    // Le mostramos al usuario la precisión actual
-                    txt.innerText = `Afinando... Error: ${Math.round(accuracy)}m`;
-
-                    // 3. CRITERIO DE ÉXITO: ¿Es buena la precisión? (< 30 metros)
-                    if (accuracy <= 30) {
-                        detenerGPS(); // Dejamos de buscar, ya es buena
-                        guardarUbicacion(lat, long);
-                    }
+                // FALLO ALTA PRECISIÓN -> VAMOS AL PLAN B
+                (err) => {
+                    console.warn("Fallo GPS preciso, probando modo WiFi...", err);
+                    txt.innerText = "GPS débil, usando antenas...";
+                    
+                    // --- INTENTO 2: BAJA PRECISIÓN (WIFI/ANTENAS) ---
+                    const opcionesBaja = {
+                        enableHighAccuracy: false, // Aceptamos ubicación aproximada
+                        timeout: 10000,
+                        maximumAge: 60000 // Aceptamos ubicación de hace 1 minuto
+                    };
+                    
+                    navigator.geolocation.getCurrentPosition(
+                        (pos) => { procesarUbicacion(pos, "Aproximada (WiFi/Red)"); },
+                        (errBaja) => { mostrarError(errBaja); }, // Si falla esto, es que no hay nada que hacer
+                        opcionesBaja
+                    );
                 },
-                
-                // B) SI DA ERROR
-                (error) => {
-                    console.warn("Error GPS:", error);
-                    // No paramos inmediatamente, esperamos a ver si se arregla
-                    // salvo que sea error crítico de permisos
-                    if (error.code === 1) { 
-                        detenerGPS();
-                        alert("Permiso denegado. Activa la ubicación.");
-                        resetBtn();
-                    }
-                },
-                opciones
+                opcionesAlta
             );
-
-            // 4. TEMPORIZADOR DE SEGURIDAD
-            // Si en 15 segundos no conseguimos precisión perfecta, nos quedamos con lo que haya
-            setTimeout(() => {
-                if (watchID !== null) {
-                    detenerGPS();
-                    alert("No logramos precisión perfecta, pero usaremos la mejor disponible.");
-                    // Aquí podríamos forzar una última lectura si quisiéramos,
-                    // pero normalmente el watchPosition ya habrá guardado algo si pudo.
-                    resetBtn(); 
-                }
-            }, 15000);
         }
 
-        function detenerGPS() {
-            if (watchID !== null) {
-                navigator.geolocation.clearWatch(watchID);
-                watchID = null;
-            }
-        }
+        // Función común para guardar el resultado (sea del Plan A o B)
+        function procesarUbicacion(position, tipo) {
+            const lat = position.coords.latitude;
+            const long = position.coords.longitude;
+            const acc = Math.round(position.coords.accuracy);
 
-        function guardarUbicacion(lat, long) {
             const btn = document.getElementById('btnGPS');
             const txt = document.getElementById('txtGPS');
             const iframe = document.getElementById('tallyFrame');
 
-            // Creamos el enlace
+            // Crear enlace Google Maps
+            // Usamos coordenadas con 6 decimales para precisión
             const mapsLink = `http://maps.google.com/?q=${lat},${long}`;
             
-            // Recargamos Tally
-            const originalUrl = iframe.getAttribute('data-original-src');
-            const nuevaUrl = `${originalUrl}&coordenadas=${encodeURIComponent(mapsLink)}`;
+            // Recargar Tally
+            const originalUrl = iframe.getAttribute('data-original-src') || iframe.src;
+            // Limpiamos si ya había coordenadas antes para no duplicar
+            const urlBase = originalUrl.split('&coordenadas=')[0]; 
+            const nuevaUrl = `${urlBase}&coordenadas=${encodeURIComponent(mapsLink)}`;
             
             iframe.style.opacity = '0.5';
             iframe.src = nuevaUrl;
 
             setTimeout(() => {
                 iframe.style.opacity = '1';
-                txt.innerText = "✅ Ubicación EXACTA Adjuntada";
-                btn.className = "flex items-center bg-green-100 text-green-700 border border-green-200 font-bold py-2 px-4 rounded-lg text-sm cursor-default";
-                btn.onclick = null; // Bloqueamos botón
+                txt.innerText = `✅ Ubicación OK (${acc}m)`;
+                // Cambiamos el color según la precisión
+                const colorClase = acc < 50 ? 'text-green-700 bg-green-100' : 'text-orange-700 bg-orange-100';
+                
+                btn.className = `flex items-center ${colorClase} border border-green-200 font-bold py-2 px-4 rounded-lg text-sm cursor-default`;
+                btn.onclick = null; 
+                
+                // Si la precisión es mala (>1000m), avisamos suavemente
+                if(acc > 1000) alert(`Aviso: La ubicación es aproximada (Error: ${acc}m). Verifica el mapa.`);
+                
             }, 1000);
+        }
+
+        function mostrarError(error) {
+            let msg = "No se pudo obtener la ubicación.";
+            if (error.code === 1) msg = "⚠️ Has bloqueado el permiso de ubicación. Revísalo en el candado de la barra de direcciones.";
+            if (error.code === 2) msg = "⚠️ Señal no disponible. Estás en un búnker.";
+            if (error.code === 3) msg = "⚠️ Tiempo agotado. El GPS no responde.";
+            
+            alert(msg);
+            resetBtn();
         }
 
         function resetBtn() {
@@ -184,7 +180,6 @@
             const txt = document.getElementById('txtGPS');
             txt.innerText = "Reintentar Ubicación";
             btn.classList.remove('bg-blue-100', 'cursor-wait');
-            detenerGPS();
         }
     </script>
 

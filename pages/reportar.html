@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reportar Incidencia - PC Aigües</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script>
         tailwind.config = { theme: { extend: { colors: { pc: { orange: '#FF6600', blue: '#003366' } } } } }
     </script>
@@ -14,8 +15,8 @@
     <nav class="bg-pc-blue text-white shadow-lg relative z-30">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <a href="../index.html" class="flex items-center space-x-3 hover:opacity-90 transition group">
-                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-pc-blue font-bold shadow-sm group-hover:ring-2 ring-white transition">
-                    <img src="../assets/img/escudo.png" alt="PC" class="w-full h-full object-cover rounded-full">
+                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-pc-blue font-bold shadow-sm group-hover:ring-2 ring-white transition overflow-hidden">
+                    <img src="../assets/img/escudo.png" alt="PC" class="w-full h-full object-cover">
                 </div>
                 <div>
                     <h1 class="text-lg font-bold leading-tight">Protección Civil</h1>
@@ -28,38 +29,55 @@
         </div>
     </nav>
 
-    <header class="bg-pc-orange text-white py-10 text-center relative overflow-hidden z-10 shadow-md">
+    <header class="bg-pc-orange text-white py-8 text-center relative overflow-hidden z-10 shadow-md">
         <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.4)_0,_transparent_100%)]"></div>
-        
         <div class="relative z-10 container mx-auto px-4">
-            <h2 class="text-3xl md:text-4xl font-bold mb-3 drop-shadow-sm">📸 Reporte Ciudadano</h2>
-            <p class="text-orange-50 max-w-xl mx-auto text-sm md:text-base font-medium">
-                Tu colaboración es vital. Ayúdanos a mantener Aigües seguro reportando desperfectos.
+            <h2 class="text-3xl font-bold mb-2 drop-shadow-sm">📸 Reporte Ciudadano</h2>
+            <p class="text-orange-50 text-sm md:text-base font-medium">
+                Indica la ubicación y describe la incidencia.
             </p>
         </div>
     </header>
 
     <main class="flex-grow container mx-auto px-4 -mt-6 relative z-20 mb-12">
         
-        <div class="bg-white rounded-2xl shadow-xl overflow-hidden max-w-3xl mx-auto border border-gray-200 p-4 md:p-8 relative">
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden max-w-3xl mx-auto border border-gray-200 p-5 md:p-8">
             
-            <div class="mb-6 bg-blue-50 border border-blue-100 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
-                <div class="text-sm text-blue-800">
-                    <p class="font-bold">📍 ¿Estás en el lugar de la incidencia?</p>
-                    <p class="text-blue-600/80 text-xs">Adjunta tu ubicación exacta (GPS) automáticamente.</p>
+            <div class="mb-6 bg-blue-50 border border-blue-100 rounded-xl p-4">
+                <label class="block text-sm font-bold text-blue-900 mb-2 flex justify-between items-center">
+                    <span>📍 Ubicación de la incidencia</span>
+                    <button onclick="verAyudaGPS()" class="text-xs text-blue-500 underline font-normal hover:text-blue-700">¿Problemas GPS?</button>
+                </label>
+
+                <div class="flex flex-col md:flex-row gap-3">
+                    
+                    <div class="relative flex-grow">
+                        <input type="text" id="inputManual" 
+                            placeholder="Ej: Calle Mayor 12 (o pulsa GPS ->)" 
+                            class="w-full pl-4 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pc-orange focus:border-transparent outline-none transition text-gray-700 bg-white"
+                            onchange="actualizarTallyManual(this.value)">
+                    </div>
+
+                    <button onclick="obtenerUbicacion()" id="btnGPS" class="group flex items-center justify-center bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-blue-700 transition-all active:scale-95 whitespace-nowrap min-w-[140px]">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <span id="txtGPS">Usar GPS</span>
+                    </button>
                 </div>
-                <button onclick="obtenerUbicacion()" id="btnGPS" class="group flex items-center bg-white text-blue-600 border border-blue-200 font-bold py-2 px-4 rounded-lg shadow-sm hover:bg-blue-600 hover:text-white hover:border-transparent transition-all active:scale-95 text-sm whitespace-nowrap">
-                    <svg class="w-5 h-5 mr-2 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    <span id="txtGPS">Adjuntar mi Ubicación</span>
-                </button>
+
+                <p class="text-xs text-blue-800/60 mt-2 flex items-center">
+                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
+                    Selecciona la ubicación antes de rellenar el formulario (se recargará).
+                </p>
             </div>
+
+            <hr class="border-gray-100 mb-6">
 
             <iframe id="tallyFrame"
                     data-original-src="https://tally.so/embed/2EP2ke?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1" 
                     src="https://tally.so/embed/2EP2ke?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1"
                     loading="lazy" 
                     width="100%" 
-                    height="300" 
+                    height="350" 
                     frameborder="0" 
                     marginheight="0" 
                     marginwidth="0" 
@@ -69,108 +87,116 @@
             
         </div>
         
-        <p class="text-center text-gray-500 text-xs mt-4 max-w-md mx-auto bg-gray-200/50 py-2 px-4 rounded-full">
-            ℹ️ Este formulario es para incidencias leves. <br class="md:hidden">
-            <span class="font-bold text-red-600">Para emergencias graves llama siempre al 112.</span>
+        <p class="text-center text-gray-400 text-xs mt-6">
+            Para emergencias graves (fuego, heridos) llama al <span class="font-bold text-red-500">112</span>.
         </p>
     </main>
 
+    <footer class="bg-gray-900 text-gray-500 py-6 text-center text-sm z-10">
+        <p>&copy; 2026 Protección Civil Aigües.</p>
+    </footer>
+
+    <script async src="https://tally.so/widgets/embed.js"></script>
+
     <script>
+        // --- 1. LÓGICA MANUAL (Si escriben dirección) ---
+        function actualizarTallyManual(texto) {
+            if(!texto) return;
+            const iframe = document.getElementById('tallyFrame');
+            
+            // Recargamos enviando el texto al campo oculto 'coordenadas' o 'direccion'
+            // Nota: Usamos el mismo campo 'coordenadas' para simplificar en el Excel
+            recargarIframe(iframe, texto);
+        }
+
+        // --- 2. LÓGICA GPS "PLAN B" ---
         function obtenerUbicacion() {
             const btn = document.getElementById('btnGPS');
             const txt = document.getElementById('txtGPS');
-            const iframe = document.getElementById('tallyFrame');
+            const input = document.getElementById('inputManual');
             
-            // Evitar doble click
             if (btn.classList.contains('cursor-wait')) return;
 
-            // Cambiar estado visual
-            txt.innerText = "Buscando satélites...";
-            btn.classList.add('bg-blue-100', 'cursor-wait');
+            // Estado visual
+            txt.innerText = "Buscando...";
+            btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            btn.classList.add('bg-blue-400', 'cursor-wait');
 
             if (!navigator.geolocation) {
-                alert("Tu dispositivo no tiene GPS.");
+                alert("GPS no disponible en este dispositivo.");
                 resetBtn();
                 return;
             }
 
-            // --- INTENTO 1: ALTA PRECISIÓN (GPS REAL) ---
-            const opcionesAlta = {
-                enableHighAccuracy: true,
-                timeout: 5000,   // Le damos solo 5 segundos para intentar pillar satélite
-                maximumAge: 0
-            };
-
+            // INTENTO 1: ALTA PRECISIÓN (5 segs)
             navigator.geolocation.getCurrentPosition(
-                // ÉXITO ALTA PRECISIÓN
-                (pos) => { procesarUbicacion(pos, "GPS Exacto"); },
-                
-                // FALLO ALTA PRECISIÓN -> VAMOS AL PLAN B
+                (pos) => procesarExito(pos, true),
                 (err) => {
-                    console.warn("Fallo GPS preciso, probando modo WiFi...", err);
-                    txt.innerText = "GPS débil, usando antenas...";
-                    
-                    // --- INTENTO 2: BAJA PRECISIÓN (WIFI/ANTENAS) ---
-                    const opcionesBaja = {
-                        enableHighAccuracy: false, // Aceptamos ubicación aproximada
-                        timeout: 10000,
-                        maximumAge: 60000 // Aceptamos ubicación de hace 1 minuto
-                    };
-                    
+                    console.log("Fallo GPS preciso, intentando WiFi...");
+                    // INTENTO 2: BAJA PRECISIÓN (Fallback)
                     navigator.geolocation.getCurrentPosition(
-                        (pos) => { procesarUbicacion(pos, "Aproximada (WiFi/Red)"); },
-                        (errBaja) => { mostrarError(errBaja); }, // Si falla esto, es que no hay nada que hacer
-                        opcionesBaja
+                        (pos) => procesarExito(pos, false),
+                        (errTotal) => mostrarError(errTotal),
+                        { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
                     );
                 },
-                opcionesAlta
+                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
             );
         }
 
-        // Función común para guardar el resultado (sea del Plan A o B)
-        function procesarUbicacion(position, tipo) {
-            const lat = position.coords.latitude;
-            const long = position.coords.longitude;
-            const acc = Math.round(position.coords.accuracy);
-
+        function procesarExito(pos, esPreciso) {
+            const lat = pos.coords.latitude;
+            const long = pos.coords.longitude;
+            const acc = Math.round(pos.coords.accuracy);
+            
             const btn = document.getElementById('btnGPS');
             const txt = document.getElementById('txtGPS');
+            const input = document.getElementById('inputManual');
             const iframe = document.getElementById('tallyFrame');
 
-            // Crear enlace Google Maps
-            // Usamos coordenadas con 6 decimales para precisión
+            // 1. Generamos enlace Maps
             const mapsLink = `http://maps.google.com/?q=${lat},${long}`;
             
-            // Recargar Tally
-            const originalUrl = iframe.getAttribute('data-original-src') || iframe.src;
-            // Limpiamos si ya había coordenadas antes para no duplicar
-            const urlBase = originalUrl.split('&coordenadas=')[0]; 
-            const nuevaUrl = `${urlBase}&coordenadas=${encodeURIComponent(mapsLink)}`;
+            // 2. Lo ponemos en el input visual para que el usuario lo vea
+            input.value = `📍 GPS Detectado (Precisión: ${acc}m)`;
             
-            iframe.style.opacity = '0.5';
-            iframe.src = nuevaUrl;
+            // 3. Enviamos a Tally
+            recargarIframe(iframe, mapsLink);
 
+            // 4. Feedback Visual
             setTimeout(() => {
-                iframe.style.opacity = '1';
-                txt.innerText = `✅ Ubicación OK (${acc}m)`;
-                // Cambiamos el color según la precisión
-                const colorClase = acc < 50 ? 'text-green-700 bg-green-100' : 'text-orange-700 bg-orange-100';
+                const color = esPreciso ? 'bg-green-600' : 'bg-orange-500';
+                const texto = esPreciso ? 'GPS OK' : 'GPS Aprox';
                 
-                btn.className = `flex items-center ${colorClase} border border-green-200 font-bold py-2 px-4 rounded-lg text-sm cursor-default`;
-                btn.onclick = null; 
+                txt.innerText = texto;
+                btn.className = `group flex items-center justify-center ${color} text-white font-bold py-3 px-6 rounded-lg shadow-md cursor-default whitespace-nowrap min-w-[140px]`;
+                btn.onclick = null; // Bloquear para no recargar sin querer
                 
-                // Si la precisión es mala (>1000m), avisamos suavemente
-                if(acc > 1000) alert(`Aviso: La ubicación es aproximada (Error: ${acc}m). Verifica el mapa.`);
-                
-            }, 1000);
+                if (acc > 1000) alert(`Aviso: Ubicación aproximada (Error: ${acc}m). Verifica si es correcta.`);
+            }, 500);
+        }
+
+        // --- UTILIDADES ---
+
+        function recargarIframe(iframe, valor) {
+            // Cogemos la URL base original (sin parámetros sucios)
+            const originalUrl = iframe.getAttribute('data-original-src') || iframe.src.split('&coordenadas=')[0];
+            
+            // Añadimos el parámetro oculto para Tally
+            // Asegúrate de que en Tally creaste el "Hidden Field" llamado 'coordenadas'
+            const nuevaUrl = `${originalUrl}&coordenadas=${encodeURIComponent(valor)}`;
+            
+            iframe.style.opacity = '0.3';
+            iframe.src = nuevaUrl;
+            
+            setTimeout(() => iframe.style.opacity = '1', 800);
         }
 
         function mostrarError(error) {
-            let msg = "No se pudo obtener la ubicación.";
-            if (error.code === 1) msg = "⚠️ Has bloqueado el permiso de ubicación. Revísalo en el candado de la barra de direcciones.";
-            if (error.code === 2) msg = "⚠️ Señal no disponible. Estás en un búnker.";
-            if (error.code === 3) msg = "⚠️ Tiempo agotado. El GPS no responde.";
-            
+            let msg = "Error desconocido.";
+            if (error.code === 1) msg = "⚠️ Permiso denegado. Activa la ubicación en el navegador.";
+            if (error.code === 2) msg = "⚠️ Sin señal GPS/Red.";
+            if (error.code === 3) msg = "⚠️ Tiempo agotado.";
             alert(msg);
             resetBtn();
         }
@@ -178,16 +204,14 @@
         function resetBtn() {
             const btn = document.getElementById('btnGPS');
             const txt = document.getElementById('txtGPS');
-            txt.innerText = "Reintentar Ubicación";
-            btn.classList.remove('bg-blue-100', 'cursor-wait');
+            txt.innerText = "Usar GPS";
+            btn.className = "group flex items-center justify-center bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-blue-700 transition-all active:scale-95 whitespace-nowrap min-w-[140px]";
+        }
+
+        function verAyudaGPS() {
+            alert("💡 MEJORAR PRECISIÓN GPS:\n\n1. Activa el WiFi (aunque no conectes).\n2. Haz un '8' con el móvil en el aire.\n3. Aléjate de edificios altos.\n4. Desactiva el ahorro de batería.");
         }
     </script>
-
-    <footer class="bg-gray-900 text-gray-500 py-6 text-center text-sm z-10">
-        <p>&copy; 2026 Protección Civil Aigües. Colaboración ciudadana.</p>
-    </footer>
-
-    <script async src="https://tally.so/widgets/embed.js"></script>
 
 </body>
 </html>
